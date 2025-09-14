@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Биоритмы · Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:16px;background:var(--tg-theme-secondary-bg-color,#f6f7fb);color:var(--tg-theme-text-color,#111)}
+    .card{background:var(--tg-theme-bg-color,#fff);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px}
+    label{display:block;margin:10px 0 6px}
+    input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:var(--tg-theme-bg-color,#fff);color:inherit}
+    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;background:var(--tg-theme-button-color,#2ea6ff);color:var(--tg-theme-button-text-color,#fff);cursor:pointer}
+    .row{display:flex;gap:12px}
+    .row > div{flex:1}
+    .hidden{display:none}
+    .ok{color:#1a7f37;font-weight:600}
+    .err{color:#b91c1c;font-weight:600}
+    small{opacity:.8}
+  </style>
+</head>
+<body>
+<div class="card">
+  <h2>Биоритмы</h2>
+  <p>Введите e-mail, указанный при оплате на GetCourse, и вашу дату рождения. После первого входа дата рождения фиксируется.</p>
+  <label>E-mail</label>
+  <input id="email" type="email" placeholder="you@example.com" />
+  <label>Дата рождения</label>
+  <input id="dob" type="date" />
+  <button id="check">Проверить доступ</button>
+  <p id="status"></p>
+  <p id="paidinfo" class="hidden"><small>Оплачено до: <span id="paiduntil"></span></small></p>
+</div>
+
+<div id="calc" class="card hidden">
+  <h3>Ваши биоритмы на сегодня</h3>
+  <div id="values"></div>
+</div>
+
+<div id="profile" class="card hidden">
+  <h3>Анкета</h3>
+  <div class="row">
+    <div>
+      <label>ФИО</label><input id="full_name" placeholder="Иванов Иван" />
+    </div>
+    <div>
+      <label>Пол</label>
+      <select id="gender">
+        <option value="">—</option>
+        <option>женский</option>
+        <option>мужской</option>
+        <option>другое</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Рост (см)</label><input id="height_cm" type="number" min="0" /></div>
+    <div><label>Вес (кг)</label><input id="weight_kg" type="number" min="0" /></div>
+  </div>
+  <label>Заболевания (через запятую)</label>
+  <textarea id="conditions" rows="3" placeholder="Напр.: гипертония, мигрень"></textarea>
+  <label>Препараты</label>
+  <textarea id="meds" rows="3" placeholder="Напр.: метопролол, вит.D"></textarea>
+  <label>Примечания</label>
+  <textarea id="notes" rows="3"></textarea>
+  <button id="saveProfile">Сохранить анкету</button>
+  <p id="pstatus"></p>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp; tg?.expand?.();
+
+function biorhythm(dobStr, dateStr) {
+  const dob = new Date(dobStr);
+  const date = dateStr ? new Date(dateStr) : new Date();
+  const days = Math.floor((date - dob) / (1000*60*60*24));
+  const cycle = (p) => Math.round(Math.sin(2*Math.PI*days/p)*100);
+  return { physical: cycle(23), emotional: cycle(28), intellectual: cycle(33) };
+}
+
+async function api(path, {method='GET', body}={}) {
+  const initData = tg?.initData || '';
+  const headers = {'x-telegram-init-data': initData};
+  if (body) headers['Content-Type'] = 'application/json';
+  const res = await fetch(path, {method, headers, body: body?JSON.stringify(body):undefined});
+  return res.json();
+}
+
+document.getElementById('check').onclick = async () => {
+  const email = document.getElementById('email').value.trim();
+  const dob = document.getElementById('dob').value;
+  const status = document.getElementById('status');
+  const paidinfo = document.getElementById('paidinfo');
+  const paiduntil = document.getElementById('paiduntil');
+
+  if (!email || !dob) { status.textContent='Заполните e-mail и дату рождения.'; status.className='err'; return; }
+  try {
+    status.textContent='Проверяем доступ...'; status.className='';
+    const data = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dob)}`,{
+      headers:{'x-telegram-init-data': tg?.initData || ''}
+    }).then(r=>r.json());
+
+    if (!data.ok) { status.textContent = data.error || 'Доступ не найден.'; status.className='err'; return; }
+
+    status.textContent='Доступ подтверждён ✅'; status.className='ok';
+    paiduntil.textContent = data.paid_until || '—';
+    paidinfo.classList.remove('hidden');
+
+    // Блокируем изменение DOB
+    document.getElementById('dob').setAttribute('disabled','disabled');
+
+    const vals = biorhythm(dob);
+    document.getElementById('values').innerHTML =
+      `<p>Физический: <b>${vals.physical}%</b><br>Эмоциональный: <b>${vals.emotional}%</b><br>Интеллектуальный: <b>${vals.intellectual}%</b></p>`;
+    document.getElementById('calc').classList.remove('hidden');
+
+    // Подтянем анкету
+    const prof = await api(`/api/profile?email=${encodeURIComponent(email)}`);
+    if (prof?.ok) {
+      const p = prof.profile || {};
+      for (const k of ['full_name','gender','height_cm','weight_kg','conditions','meds','notes']) {
+        if (p[k]!==undefined && document.getElementById(k)) document.getElementById(k).value = p[k] ?? '';
+      }
+      document.getElementById('profile').classList.remove('hidden');
+    }
+    tg?.MainButton?.setText?.('Готово'); tg?.MainButton?.show?.();
+  } catch(e) {
+    status.textContent='Ошибка соединения. Попробуйте ещё раз.'; status.className='err';
+  }
+};
+
+document.getElementById('saveProfile').onclick = async () => {
+  const email = document.getElementById('email').value.trim();
+  const payload = {
+    email,
+    full_name: document.getElementById('full_name').value.trim(),
+    gender: document.getElementById('gender').value,
+    height_cm: document.getElementById('height_cm').value,
+    weight_kg: document.getElementById('weight_kg').value,
+    conditions: document.getElementById('conditions').value,
+    meds: document.getElementById('meds').value,
+    notes: document.getElementById('notes').value
+  };
+  const pstatus = document.getElementById('pstatus');
+  pstatus.textContent='Сохраняем...'; pstatus.className='';
+  try {
+    const res = await api('/api/profile', {method:'PUT', body: payload});
+    if (res.ok) { pstatus.textContent='Сохранено ✅'; pstatus.className='ok'; }
+    else { pstatus.textContent=res.error||'Не удалось сохранить'; pstatus.className='err'; }
+  } catch {
+    pstatus.textContent='Ошибка соединения'; pstatus.className='err';
+  }
+};
+</script>
+</body>
+</html>
