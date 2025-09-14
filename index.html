@@ -3,154 +3,239 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Биоритмы · Mini App</title>
+  <title>Биоритмы · Метод 1..22</title>
+  <!-- SDK Telegram (не обязателен для обычного браузера, но полезен в Mini App) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:16px;background:var(--tg-theme-secondary-bg-color,#f6f7fb);color:var(--tg-theme-text-color,#111)}
-    .card{background:var(--tg-theme-bg-color,#fff);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px}
-    label{display:block;margin:10px 0 6px}
-    input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;background:var(--tg-theme-bg-color,#fff);color:inherit}
-    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;background:var(--tg-theme-button-color,#2ea6ff);color:var(--tg-theme-button-text-color,#fff);cursor:pointer}
-    .row{display:flex;gap:12px}
-    .row > div{flex:1}
+    :root{
+      --bg: var(--tg-theme-secondary-bg-color,#f6f7fb);
+      --card: var(--tg-theme-bg-color,#fff);
+      --text: var(--tg-theme-text-color,#111);
+      --muted: rgba(0,0,0,.6);
+      --btn: var(--tg-theme-button-color,#2ea6ff);
+      --btn-text: var(--tg-theme-button-text-color,#fff);
+      --border: #e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;padding:16px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
+    .wrap{max-width:720px;margin:0 auto}
+    h1{font-size:22px;margin:0 0 12px}
+    h2{font-size:18px;margin:0 0 10px}
+    h3{font-size:16px;margin:0 0 8px}
+    .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px;border:1px solid var(--border)}
+    label{display:block;margin:10px 0 6px;font-weight:600}
+    input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:inherit}
+    button{padding:12px 16px;border:0;border-radius:12px;font-weight:700;background:var(--btn);color:var(--btn-text);cursor:pointer}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > div{flex:1 1 180px}
+    .muted{color:var(--muted)}
     .hidden{display:none}
-    .ok{color:#1a7f37;font-weight:600}
-    .err{color:#b91c1c;font-weight:600}
-    small{opacity:.8}
+    .ok{color:#1a7f37;font-weight:700}
+    .err{color:#b91c1c;font-weight:700}
+    .kv{display:grid;grid-template-columns:180px 1fr;gap:8px}
+    .pill{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px}
+    .foot{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
-<div class="card">
-  <h2>Биоритмы</h2>
-  <p>Введите e-mail, указанный при оплате на GetCourse, и вашу дату рождения. После первого входа дата рождения фиксируется.</p>
-  <label>E-mail</label>
-  <input id="email" type="email" placeholder="you@example.com" />
-  <label>Дата рождения</label>
-  <input id="dob" type="date" />
-  <button id="check">Проверить доступ</button>
-  <p id="status"></p>
-  <p id="paidinfo" class="hidden"><small>Оплачено до: <span id="paiduntil"></span></small></p>
-</div>
+<div class="wrap">
+  <div class="card">
+    <h1>Биоритмы (метод 1..22)</h1>
+    <p class="muted">Правила: «Общий 2025» = день + месяц + 9 → сводим к 1..22; расчёт для выбранного месяца = день + месяц + 9 + номер месяца → сводим к 1..22 (если &gt;22 — складываем цифры до диапазона).</p>
 
-<div id="calc" class="card hidden">
-  <h3>Ваши биоритмы на сегодня</h3>
-  <div id="values"></div>
-</div>
+    <div class="row">
+      <div>
+        <label>День рождения</label>
+        <input id="b22_day" type="number" min="1" max="31" placeholder="дд" />
+      </div>
+      <div>
+        <label>Месяц рождения</label>
+        <select id="b22_month">
+          <option value="">—</option>
+          <option value="1">январь</option>
+          <option value="2">февраль</option>
+          <option value="3">март</option>
+          <option value="4">апрель</option>
+          <option value="5">май</option>
+          <option value="6">июнь</option>
+          <option value="7">июль</option>
+          <option value="8">август</option>
+          <option value="9">сентябрь</option>
+          <option value="10">октябрь</option>
+          <option value="11">ноябрь</option>
+          <option value="12">декабрь</option>
+        </select>
+      </div>
+    </div>
 
-<div id="profile" class="card hidden">
-  <h3>Анкета</h3>
-  <div class="row">
-    <div>
-      <label>ФИО</label><input id="full_name" placeholder="Иванов Иван" />
-    </div>
-    <div>
-      <label>Пол</label>
-      <select id="gender">
-        <option value="">—</option>
-        <option>женский</option>
-        <option>мужской</option>
-        <option>другое</option>
-      </select>
-    </div>
+    <button id="b22_calc">Рассчитать</button>
+    <p id="b22_status" class="muted"></p>
   </div>
-  <div class="row">
-    <div><label>Рост (см)</label><input id="height_cm" type="number" min="0" /></div>
-    <div><label>Вес (кг)</label><input id="weight_kg" type="number" min="0" /></div>
+
+  <div id="b22_results" class="card hidden">
+    <h2>Результаты</h2>
+    <div class="kv" style="margin:8px 0 12px">
+      <div><b>Общий биоритм 2025</b></div>
+      <div><span id="b22_general" class="pill"></span></div>
+    </div>
+
+    <label>Выберите месяц для расчёта пунктов 2–7</label>
+    <select id="b22_sel_month">
+      <option value="1">январь</option>
+      <option value="2">февраль</option>
+      <option value="3">март</option>
+      <option value="4">апрель</option>
+      <option value="5">май</option>
+      <option value="6">июнь</option>
+      <option value="7">июль</option>
+      <option value="8">август</option>
+      <option value="9">сентябрь</option>
+      <option value="10">октябрь</option>
+      <option value="11">ноябрь</option>
+      <option value="12">декабрь</option>
+    </select>
+
+    <div class="kv" style="margin-top:12px">
+      <div><b>Число месяца</b> (для 2–7)</div>
+      <div><span id="b22_month_value" class="pill"></span></div>
+
+      <div><b>2) Биоритм месяца</b></div>
+      <div id="b22_m_biorhythm">—</div>
+
+      <div><b>3) Фитотерапия</b></div>
+      <div id="b22_m_herbs">—</div>
+
+      <div><b>4) Питание</b></div>
+      <div id="b22_m_nutrition">—</div>
+
+      <div><b>5) Витамины</b></div>
+      <div id="b22_m_vitamins">—</div>
+
+      <div><b>6) Минералы</b></div>
+      <div id="b22_m_minerals">—</div>
+
+      <div><b>7) Эфирные масла</b></div>
+      <div id="b22_m_oils">—</div>
+    </div>
+
+    <p class="foot">Подсказка: если сумма &gt; 22 — складываем цифры (например, 24 → 2+4 = 6). Повторяем до диапазона 1–22.</p>
   </div>
-  <label>Заболевания (через запятую)</label>
-  <textarea id="conditions" rows="3" placeholder="Напр.: гипертония, мигрень"></textarea>
-  <label>Препараты</label>
-  <textarea id="meds" rows="3" placeholder="Напр.: метопролол, вит.D"></textarea>
-  <label>Примечания</label>
-  <textarea id="notes" rows="3"></textarea>
-  <button id="saveProfile">Сохранить анкету</button>
-  <p id="pstatus"></p>
+
+  <div class="card">
+    <h3>Примеры</h3>
+    <p class="muted">
+      23 января → 2+3+1+9 = 15 (общий 2025).<br/>
+      8 февраля → 8+2+9 = 19 (общий 2025).<br/>
+      1 января, выбран июнь → 1+1+9+6 = 17 (месяц).<br/>
+      22 мая, выбран июнь → 2+2+5+9+6 = 24 → 2+4 = 6 (месяц).
+    </p>
+  </div>
 </div>
 
 <script>
+/* ===================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===================== */
 const tg = window.Telegram?.WebApp; tg?.expand?.();
 
-function biorhythm(dobStr, dateStr) {
-  const dob = new Date(dobStr);
-  const date = dateStr ? new Date(dateStr) : new Date();
-  const days = Math.floor((date - dob) / (1000*60*60*24));
-  const cycle = (p) => Math.round(Math.sin(2*Math.PI*days/p)*100);
-  return { physical: cycle(23), emotional: cycle(28), intellectual: cycle(33) };
+function sumDigits(n){ return String(Math.abs(n)).split('').reduce((a,d)=>a+Number(d),0); }
+
+/** сводим число к диапазону 1..22: если >22 — суммируем цифры; повторяем пока <=22 */
+function reduceTo22(n){
+  let x = Number(n)||0;
+  // Если вдруг получилось 0, поднимем до 1 (на практике не бывает, но на всякий случай)
+  if (x <= 0) return 1;
+  while (x > 22) x = sumDigits(x);
+  return x;
 }
 
-async function api(path, {method='GET', body}={}) {
-  const initData = tg?.initData || '';
-  const headers = {'x-telegram-init-data': initData};
-  if (body) headers['Content-Type'] = 'application/json';
-  const res = await fetch(path, {method, headers, body: body?JSON.stringify(body):undefined});
-  return res.json();
+/** общий биоритм 2025 = день + месяц + 9 → reduceTo22 */
+function computeGeneral2025(day, month){
+  if(!day || !month) return null;
+  return reduceTo22(Number(day) + Number(month) + 9);
 }
 
-document.getElementById('check').onclick = async () => {
-  const email = document.getElementById('email').value.trim();
-  const dob = document.getElementById('dob').value;
-  const status = document.getElementById('status');
-  const paidinfo = document.getElementById('paidinfo');
-  const paiduntil = document.getElementById('paiduntil');
+/** значение для выбранного месяца = день + месяц + 9 + номер_месяца → reduceTo22 */
+function computeMonthlyValue(day, month, monthSelected){
+  if(!day || !month || !monthSelected) return null;
+  return reduceTo22(Number(day) + Number(month) + 9 + Number(monthSelected));
+}
 
-  if (!email || !dob) { status.textContent='Заполните e-mail и дату рождения.'; status.className='err'; return; }
-  try {
-    status.textContent='Проверяем доступ...'; status.className='';
-    const data = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dob)}`,{
-      headers:{'x-telegram-init-data': tg?.initData || ''}
-    }).then(r=>r.json());
+/* ===================== СЛОВАРИ-ШПАРГАЛКИ (1..22) ===================== */
+/* Заполните свои тексты рекомендаций; сейчас стоят примерные заглушки, чтобы всё работало. */
 
-    if (!data.ok) { status.textContent = data.error || 'Доступ не найден.'; status.className='err'; return; }
-
-    status.textContent='Доступ подтверждён ✅'; status.className='ok';
-    paiduntil.textContent = data.paid_until || '—';
-    paidinfo.classList.remove('hidden');
-
-    // Блокируем изменение DOB
-    document.getElementById('dob').setAttribute('disabled','disabled');
-
-    const vals = biorhythm(dob);
-    document.getElementById('values').innerHTML =
-      `<p>Физический: <b>${vals.physical}%</b><br>Эмоциональный: <b>${vals.emotional}%</b><br>Интеллектуальный: <b>${vals.intellectual}%</b></p>`;
-    document.getElementById('calc').classList.remove('hidden');
-
-    // Подтянем анкету
-    const prof = await api(`/api/profile?email=${encodeURIComponent(email)}`);
-    if (prof?.ok) {
-      const p = prof.profile || {};
-      for (const k of ['full_name','gender','height_cm','weight_kg','conditions','meds','notes']) {
-        if (p[k]!==undefined && document.getElementById(k)) document.getElementById(k).value = p[k] ?? '';
-      }
-      document.getElementById('profile').classList.remove('hidden');
-    }
-    tg?.MainButton?.setText?.('Готово'); tg?.MainButton?.show?.();
-  } catch(e) {
-    status.textContent='Ошибка соединения. Попробуйте ещё раз.'; status.className='err';
-  }
+const MAP_BIORHYTHM_MONTH = {
+  1:"Активный старт; новые дела, инициативы.",
+  2:"Баланс, взаимодействие, «работа в паре».",
+  3:"Коммуникации, творчество, обучение через обмен.",
+  4:"Структура, режим, дисциплина, порядок.",
+  5:"Гибкость и перемены, поездки, обновления.",
+  6:"Забота о себе, восстановление, дом.",
+  7:"Аналитика, обучение, внутренняя работа.",
+  8:"Энергия достижения, финансы, цели.",
+  9:"Завершение циклов, подведение итогов.",
+  10:"Импульс роста и расширения.",
+  11:"Интуиция, осознанность, наблюдение.",
+  12:"Спокойствие, пауза, мягкий темп.",
+  13:"Трансформация и перезапуск.",
+  14:"Свобода, движение, эксперименты.",
+  15:"Гармония, поддержка, уют.",
+  16:"Глубокая концентрация, фокус.",
+  17:"Благоприятные возможности.",
+  18:"Стабильность, заземление.",
+  19:"Высокий тонус, драйв.",
+  20:"Укрепление базы и ресурсов.",
+  21:"Синергия, сотрудничество.",
+  22:"Мастерство, итог периода."
 };
 
-document.getElementById('saveProfile').onclick = async () => {
-  const email = document.getElementById('email').value.trim();
-  const payload = {
-    email,
-    full_name: document.getElementById('full_name').value.trim(),
-    gender: document.getElementById('gender').value,
-    height_cm: document.getElementById('height_cm').value,
-    weight_kg: document.getElementById('weight_kg').value,
-    conditions: document.getElementById('conditions').value,
-    meds: document.getElementById('meds').value,
-    notes: document.getElementById('notes').value
-  };
-  const pstatus = document.getElementById('pstatus');
-  pstatus.textContent='Сохраняем...'; pstatus.className='';
-  try {
-    const res = await api('/api/profile', {method:'PUT', body: payload});
-    if (res.ok) { pstatus.textContent='Сохранено ✅'; pstatus.className='ok'; }
-    else { pstatus.textContent=res.error||'Не удалось сохранить'; pstatus.className='err'; }
-  } catch {
-    pstatus.textContent='Ошибка соединения'; pstatus.className='err';
+// Ниже — пустые «контент-словарики» для разделов 3–7.
+// Впишите ваши материалы для чисел 1..22 — и они начнут подставляться в интерфейсе.
+const MAP_HERBS     = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+const MAP_NUTRITION = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+const MAP_VITAMINS  = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+const MAP_MINERALS  = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+const MAP_OILS      = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+
+/* ===================== ЛОГИКА UI ===================== */
+const $ = (id)=>document.getElementById(id);
+
+$('b22_calc').onclick = () => {
+  const day = Number($('b22_day').value);
+  const month = Number($('b22_month').value);
+  const status = $('b22_status');
+
+  if (!day || !month){
+    status.textContent = 'Укажите день и месяц рождения.';
+    status.className = 'err';
+    return;
   }
+
+  const general = computeGeneral2025(day, month);
+  $('b22_general').textContent = general;
+
+  $('b22_results').classList.remove('hidden');
+  status.textContent = 'Готово ✅';
+  status.className = 'ok';
+
+  recalcSelectedMonth();
 };
+
+$('b22_sel_month').onchange = recalcSelectedMonth;
+
+function recalcSelectedMonth(){
+  const day = Number($('b22_day').value);
+  const month = Number($('b22_month').value);
+  const mSel = Number($('b22_sel_month').value);
+
+  const val = computeMonthlyValue(day, month, mSel);
+  $('b22_month_value').textContent = val ?? '—';
+
+  $('b22_m_biorhythm').textContent = val ? (MAP_BIORHYTHM_MONTH[val] || '—') : '—';
+  $('b22_m_herbs').textContent     = val ? (MAP_HERBS[val]            || '—') : '—';
+  $('b22_m_nutrition').textContent = val ? (MAP_NUTRITION[val]        || '—') : '—';
+  $('b22_m_vitamins').textContent  = val ? (MAP_VITAMINS[val]         || '—') : '—';
+  $('b22_m_minerals').textContent  = val ? (MAP_MINERALS[val]         || '—') : '—';
+  $('b22_m_oils').textContent      = val ? (MAP_OILS[val]             || '—') : '—';
+}
 </script>
 </body>
 </html>
