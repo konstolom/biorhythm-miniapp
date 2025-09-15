@@ -1,241 +1,339 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <title>Ваши биоритмы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Биоритмы · Метод 1..22</title>
-  <!-- SDK Telegram (не обязателен для обычного браузера, но полезен в Mini App) -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root{
-      --bg: var(--tg-theme-secondary-bg-color,#f6f7fb);
-      --card: var(--tg-theme-bg-color,#fff);
-      --text: var(--tg-theme-text-color,#111);
-      --muted: rgba(0,0,0,.6);
-      --btn: var(--tg-theme-button-color,#2ea6ff);
-      --btn-text: var(--tg-theme-button-text-color,#fff);
-      --border: #e5e7eb;
-    }
+    :root{ --bg:#0f1115; --card:#171a22; --muted:#9aa4b2; --text:#e8edf2; --accent:#6ee7b7; --danger:#f87171; --btn:#222738; --btn-h:#32384d; --br:14px; }
     *{box-sizing:border-box}
-    body{margin:0;padding:16px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
-    .wrap{max-width:720px;margin:0 auto}
-    h1{font-size:22px;margin:0 0 12px}
-    h2{font-size:18px;margin:0 0 10px}
-    h3{font-size:16px;margin:0 0 8px}
-    .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:16px;border:1px solid var(--border)}
-    label{display:block;margin:10px 0 6px;font-weight:600}
-    input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:inherit}
-    button{padding:12px 16px;border:0;border-radius:12px;font-weight:700;background:var(--btn);color:var(--btn-text);cursor:pointer}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .row > div{flex:1 1 180px}
+    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text)}
+    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(120%) blur(8px); background:rgba(15,17,21,.7); border-bottom:1px solid #222}
+    .wrap{max-width:900px; margin:0 auto; padding:20px}
+    .brand{font-weight:800; letter-spacing:.3px}
+    .menu{display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap}
+    .menu button{background:var(--btn); color:var(--text); border:1px solid #2a3042; padding:10px 14px; border-radius:10px; cursor:pointer}
+    .menu button:hover{background:var(--btn-h)}
+    .container{max-width:900px; margin:30px auto; padding:0 20px}
+    .card{background:var(--card); border:1px solid #222738; border-radius:var(--br); padding:18px; box-shadow:0 4px 16px rgba(0,0,0,.25); margin-bottom:20px}
+    .hidden{display:none!important}
+    h2{margin:0 0 12px 0; font-size:22px}
+    label{display:block; margin:10px 0 6px}
+    input, select{width:100%; padding:10px 12px; background:#0c0f14; border:1px solid #2a3042; color:var(--text); border-radius:10px}
+    input[disabled]{opacity:.8; cursor:not-allowed}
+    .btn{background:linear-gradient(180deg,#2b3348,#23293b); border:1px solid #343c56; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer}
+    .grid-btns{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
+    .pill{display:inline-block; font-size:12px; background:#0c0f14; border:1px solid #2a3042; padding:4px 8px; border-radius:999px; color:var(--muted)}
+    .hl{color:var(--accent)}
     .muted{color:var(--muted)}
-    .hidden{display:none}
-    .ok{color:#1a7f37;font-weight:700}
-    .err{color:#b91c1c;font-weight:700}
-    .kv{display:grid;grid-template-columns:180px 1fr;gap:8px}
-    .pill{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px}
-    .foot{font-size:12px;color:var(--muted)}
+    .danger{background:#2a1212; border:1px solid #522; color:#ffcccc}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row > *{flex:1 1 260px}
+    .spacer{height:8px}
+    .backbar{display:flex; align-items:center; gap:10px; margin-bottom:14px}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <h1>Биоритмы (метод 1..22)</h1>
-    <p class="muted">Правила: «Общий 2025» = день + месяц + 9 → сводим к 1..22; расчёт для выбранного месяца = день + месяц + 9 + номер месяца → сводим к 1..22 (если &gt;22 — складываем цифры до диапазона).</p>
-
-    <div class="row">
-      <div>
-        <label>День рождения</label>
-        <input id="b22_day" type="number" min="1" max="31" placeholder="дд" />
-      </div>
-      <div>
-        <label>Месяц рождения</label>
-        <select id="b22_month">
-          <option value="">—</option>
-          <option value="1">январь</option>
-          <option value="2">февраль</option>
-          <option value="3">март</option>
-          <option value="4">апрель</option>
-          <option value="5">май</option>
-          <option value="6">июнь</option>
-          <option value="7">июль</option>
-          <option value="8">август</option>
-          <option value="9">сентябрь</option>
-          <option value="10">октябрь</option>
-          <option value="11">ноябрь</option>
-          <option value="12">декабрь</option>
-        </select>
+  <header>
+    <div class="wrap">
+      <div class="brand">Ваши биоритмы</div>
+      <div class="menu">
+        <button id="menu-profile" class="btn" onclick="route('profile')" disabled>Анкета</button>
+        <button id="menu-bio" class="btn" onclick="route('bio')" disabled>Биоритмы</button>
+        <span class="pill" id="userEmailPill"></span>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="logout()" id="logoutBtn" disabled>Выйти</button>
       </div>
     </div>
+  </header>
 
-    <button id="b22_calc">Рассчитать</button>
-    <p id="b22_status" class="muted"></p>
-  </div>
+  <main class="container">
+    <!-- 1) Email -->
+    <section id="emailSec" class="card">
+      <h2>Введите ваш email</h2>
+      <div class="row">
+        <div>
+          <label>Email</label>
+          <input id="authEmail" type="email" placeholder="you@example.com" />
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="emailLogin()">Продолжить</button>
+      <div class="spacer"></div>
+      <div id="emailMsg" class="muted"></div>
+    </section>
 
-  <div id="b22_results" class="card hidden">
-    <h2>Результаты</h2>
-    <div class="kv" style="margin:8px 0 12px">
-      <div><b>Общий биоритм 2025</b></div>
-      <div><span id="b22_general" class="pill"></span></div>
-    </div>
+    <!-- 2) Однократно: дата рождения -->
+    <section id="birthSec" class="card hidden">
+      <h2>Укажите дату рождения (сохранится навсегда)</h2>
+      <div class="row">
+        <div>
+          <label>Дата рождения</label>
+          <input id="birthInput" type="date" />
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="saveBirth()">Сохранить навсегда</button>
+      <div class="spacer"></div>
+      <div class="muted">После сохранения изменить дату рождения в приложении будет невозможно (только вручную в БД).</div>
+      <div class="spacer"></div>
+      <div id="birthMsg" class="muted"></div>
+    </section>
 
-    <label>Выберите месяц для расчёта пунктов 2–7</label>
-    <select id="b22_sel_month">
-      <option value="1">январь</option>
-      <option value="2">февраль</option>
-      <option value="3">март</option>
-      <option value="4">апрель</option>
-      <option value="5">май</option>
-      <option value="6">июнь</option>
-      <option value="7">июль</option>
-      <option value="8">август</option>
-      <option value="9">сентябрь</option>
-      <option value="10">октябрь</option>
-      <option value="11">ноябрь</option>
-      <option value="12">декабрь</option>
-    </select>
+    <!-- Анкета -->
+    <section id="profileSec" class="card hidden">
+      <h2>Анкета</h2>
+      <div class="row">
+        <div>
+          <label>Имя</label>
+          <input id="fName" />
+        </div>
+        <div>
+          <label>Город рождения</label>
+          <input id="fCity" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Дата рождения (зафиксирована)</label>
+          <input id="fBirthDate" disabled />
+        </div>
+        <div>
+          <label>Подписка до</label>
+          <input id="fSubEnd" disabled />
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="saveProfile()">Сохранить</button>
+      <div class="spacer"></div>
+      <div id="profileMsg" class="muted"></div>
+    </section>
 
-    <div class="kv" style="margin-top:12px">
-      <div><b>Число месяца</b> (для 2–7)</div>
-      <div><span id="b22_month_value" class="pill"></span></div>
+    <!-- Биоритмы: главная -->
+    <section id="bioHomeSec" class="hidden">
+      <div id="bioMainCard" class="card hidden">
+        <h2>Ваши биоритмы на 2025 год</h2>
+        <div id="yearlyBlock">Загрузка…</div>
+      </div>
 
-      <div><b>2) Биоритм месяца</b></div>
-      <div id="b22_m_biorhythm">—</div>
+      <div id="bioBtnsCard" class="card hidden">
+        <h3>Разделы</h3>
+        <div class="grid-btns">
+          <button class="btn" onclick="openCategory('MONTHLY')">Биоритмы по месяцам</button>
+          <button class="btn" onclick="openCategory('HERBS')">Фитотерапия по месяцам</button>
+          <button class="btn" onclick="openCategory('NUTRITION')">Питание по месяцам</button>
+          <button class="btn" onclick="openCategory('VITAMINS')">Витамины по месяцам</button>
+          <button class="btn" onclick="openCategory('MINERALS')">Минералы по месяцам</button>
+          <button class="btn" onclick="openCategory('OILS')">Эфирные масла по месяцам</button>
+          <button class="btn" onclick="openCategory('SUPPLEMENTS')">БАДы по месяцам</button>
+        </div>
+      </div>
+    </section>
 
-      <div><b>3) Фитотерапия</b></div>
-      <div id="b22_m_herbs">—</div>
+    <!-- Страница категории -->
+    <section id="categorySec" class="hidden">
+      <div class="card">
+        <div class="backbar">
+          <button class="btn" onclick="backToBio()">← Назад</button>
+          <h2 id="catTitle" style="margin:0"></h2>
+        </div>
+        <div class="row">
+          <div>
+            <label>Месяц</label>
+            <select id="monthSelect" onchange="renderCategoryResult()">
+              <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
+              <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
+              <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
+              <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
+            </select>
+          </div>
+          <div style="align-self:flex-end">
+            <button class="btn" onclick="renderCategoryResult()">Рассчитать</button>
+          </div>
+        </div>
+      </div>
+      <div id="catResultCard" class="card">
+        <div id="catResult">Выберите месяц для расчёта…</div>
+      </div>
+    </section>
+  </main>
 
-      <div><b>4) Питание</b></div>
-      <div id="b22_m_nutrition">—</div>
+  <script>
+    // ====== Настройки Supabase Edge ======
+    const SUPABASE_URL = "https://evqracwzgotothjelcdl.supabase.co";   // ← замените
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM";                 // ← замените
+    const FN = (name) => `${SUPABASE_URL}/functions/v1/${name}`;
+    const headers = {
+      "Content-Type":"application/json",
+      "authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "apikey": SUPABASE_ANON_KEY
+    };
 
-      <div><b>5) Витамины</b></div>
-      <div id="b22_m_vitamins">—</div>
+    // ====== Состояние ======
+    let appData = null;  // data.json
+    let profile = null;  // {email,name,birth_city,birth_date,subscription_end}
+    let currentCategoryKey = null;
 
-      <div><b>6) Минералы</b></div>
-      <div id="b22_m_minerals">—</div>
+    // ====== Утилиты ======
+    const $ = s => document.querySelector(s);
+    const show = (sel, on=true)=> { const el=$(sel); if(!el) return; el.classList.toggle('hidden', !on); };
+    function enableMenu(){ $('#menu-profile').disabled=false; $('#menu-bio').disabled=false; $('#logoutBtn').disabled=false; }
+    function disableMenu(){ $('#menu-profile').disabled=true; $('#menu-bio').disabled=true; $('#logoutBtn').disabled=true; }
+    function logout(){ profile=null; $('#userEmailPill').textContent=''; disableMenu(); show('#emailSec',true); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',false); show('#categorySec',false); }
 
-      <div><b>7) Эфирные масла</b></div>
-      <div id="b22_m_oils">—</div>
-    </div>
+    function route(where){
+      if(!profile){ show('#emailSec',true); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',false); show('#categorySec',false); return; }
+      if(where==='profile'){ show('#emailSec',false); show('#birthSec',false); show('#profileSec',true); show('#bioHomeSec',false); show('#categorySec',false); }
+      if(where==='bio'){ show('#emailSec',false); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',true); show('#categorySec',false); renderBioHome(); }
+    }
+    function backToBio(){ route('bio'); }
 
-    <p class="foot">Подсказка: если сумма &gt; 22 — складываем цифры (например, 24 → 2+4 = 6). Повторяем до диапазона 1–22.</p>
-  </div>
+    // ====== Загрузка словаря ======
+    async function loadDictionary(){
+      if(appData) return appData;
+      const res = await fetch('data.json', { cache: 'no-store' });
+      appData = await res.json();
+      return appData;
+    }
 
-  <div class="card">
-    <h3>Примеры</h3>
-    <p class="muted">
-      23 января → 2+3+1+9 = 15 (общий 2025).<br/>
-      8 февраля → 8+2+9 = 19 (общий 2025).<br/>
-      1 января, выбран июнь → 1+1+9+6 = 17 (месяц).<br/>
-      22 мая, выбран июнь → 2+2+5+9+6 = 24 → 2+4 = 6 (месяц).
-    </p>
-  </div>
-</div>
+    // ====== Логин по email ======
+    async function emailLogin(){
+      const email = $('#authEmail').value.trim().toLowerCase();
+      if(!email){ $('#emailMsg').textContent='Введите email.'; return; }
+      $('#emailMsg').textContent='Загружаем профиль…';
+      try{
+        const resp = await fetch(FN('app-login'), { method:'POST', headers, body: JSON.stringify({ email }) });
+        const data = await resp.json();
+        if(!resp.ok || !data.ok) throw new Error(data.error || 'Ошибка');
 
-<script>
-/* ===================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===================== */
-const tg = window.Telegram?.WebApp; tg?.expand?.();
+        profile = data.profile;
+        $('#userEmailPill').textContent = profile.email || '';
+        $('#emailMsg').textContent = '';
 
-function sumDigits(n){ return String(Math.abs(n)).split('').reduce((a,d)=>a+Number(d),0); }
+        if(!profile.birth_date){
+          show('#emailSec',false); show('#birthSec',true); disableMenu();
+          return;
+        }
 
-/** сводим число к диапазону 1..22: если >22 — суммируем цифры; повторяем пока <=22 */
-function reduceTo22(n){
-  let x = Number(n)||0;
-  // Если вдруг получилось 0, поднимем до 1 (на практике не бывает, но на всякий случай)
-  if (x <= 0) return 1;
-  while (x > 22) x = sumDigits(x);
-  return x;
-}
+        await loadDictionary();
+        fillProfileUI();
+        enableMenu();
+        route('profile');
+      }catch(e){
+        $('#emailMsg').textContent = String(e.message || e);
+      }
+    }
 
-/** общий биоритм 2025 = день + месяц + 9 → reduceTo22 */
-function computeGeneral2025(day, month){
-  if(!day || !month) return null;
-  return reduceTo22(Number(day) + Number(month) + 9);
-}
+    // ====== Сохранить дату рождения (однократно) ======
+    async function saveBirth(){
+      const birth = $('#birthInput').value;
+      if(!birth){ $('#birthMsg').textContent='Выберите дату рождения.'; return; }
+      $('#birthMsg').textContent='Сохраняем…';
+      try{
+        const resp = await fetch(FN('set-birthdate'), { method:'POST', headers, body: JSON.stringify({ email: profile.email, birth_date: birth }) });
+        const data = await resp.json();
+        if(!resp.ok || !data.ok){
+          $('#birthMsg').textContent = (data && data.error) ? data.error : 'Ошибка';
+          return;
+        }
+        profile = { ...profile, ...data.profile };
+        await loadDictionary();
+        fillProfileUI();
+        enableMenu();
+        show('#birthSec',false);
+        route('profile');
+      }catch(e){
+        $('#birthMsg').textContent = String(e.message || e);
+      }
+    }
 
-/** значение для выбранного месяца = день + месяц + 9 + номер_месяца → reduceTo22 */
-function computeMonthlyValue(day, month, monthSelected){
-  if(!day || !month || !monthSelected) return null;
-  return reduceTo22(Number(day) + Number(month) + 9 + Number(monthSelected));
-}
+    // ====== Анкета ======
+    function fillProfileUI(){
+      $('#fName').value = profile.name || '';
+      $('#fCity').value = profile.birth_city || '';
+      $('#fBirthDate').value = profile.birth_date || '';
+      $('#fSubEnd').value = profile.subscription_end || '';
+    }
 
-/* ===================== СЛОВАРИ-ШПАРГАЛКИ (1..22) ===================== */
-/* Заполните свои тексты рекомендаций; сейчас стоят примерные заглушки, чтобы всё работало. */
+    async function saveProfile(){
+      if(!profile?.email) return;
+      const body = {
+        email: profile.email,
+        name: $('#fName').value.trim() || null,
+        birth_city: $('#fCity').value.trim() || null
+      };
+      const resp = await fetch(FN('update-profile'), { method:'POST', headers, body: JSON.stringify(body) });
+      const data = await resp.json();
+      if(!resp.ok || !data.ok){ $('#profileMsg').textContent = data.error || 'Ошибка'; return; }
+      profile = { ...profile, ...data.profile };
+      $('#profileMsg').textContent = 'Анкета сохранена ✅';
+    }
 
-const MAP_BIORHYTHM_MONTH = {
-  1:"Активный старт; новые дела, инициативы.",
-  2:"Баланс, взаимодействие, «работа в паре».",
-  3:"Коммуникации, творчество, обучение через обмен.",
-  4:"Структура, режим, дисциплина, порядок.",
-  5:"Гибкость и перемены, поездки, обновления.",
-  6:"Забота о себе, восстановление, дом.",
-  7:"Аналитика, обучение, внутренняя работа.",
-  8:"Энергия достижения, финансы, цели.",
-  9:"Завершение циклов, подведение итогов.",
-  10:"Импульс роста и расширения.",
-  11:"Интуиция, осознанность, наблюдение.",
-  12:"Спокойствие, пауза, мягкий темп.",
-  13:"Трансформация и перезапуск.",
-  14:"Свобода, движение, эксперименты.",
-  15:"Гармония, поддержка, уют.",
-  16:"Глубокая концентрация, фокус.",
-  17:"Благоприятные возможности.",
-  18:"Стабильность, заземление.",
-  19:"Высокий тонус, драйв.",
-  20:"Укрепление базы и ресурсов.",
-  21:"Синергия, сотрудничество.",
-  22:"Мастерство, итог периода."
-};
+    // ====== Математика ======
+    function reduceTo22(n){ while(n>22){ n=String(n).split('').map(Number).reduce((a,b)=>a+b,0); } return n; }
+    function calcYearlyNumber(birthISO){
+      if(!birthISO) return null;
+      const d = new Date(birthISO);
+      const day = d.getUTCDate(), month = d.getUTCMonth()+1;
+      return reduceTo22(day + month + 9);
+    }
+    function calcMonthlyNumber(birthISO, mm){
+      if(!birthISO) return null;
+      const d = new Date(birthISO);
+      const day = d.getUTCDate(), month = d.getUTCMonth()+1;
+      return reduceTo22(day + month + 9 + Number(mm));
+    }
 
-// Ниже — пустые «контент-словарики» для разделов 3–7.
-// Впишите ваши материалы для чисел 1..22 — и они начнут подставляться в интерфейсе.
-const MAP_HERBS     = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
-const MAP_NUTRITION = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
-const MAP_VITAMINS  = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
-const MAP_MINERALS  = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
-const MAP_OILS      = {1:"—",2:"—",3:"—",4:"—",5:"—",6:"—",7:"—",8:"—",9:"—",10:"—",11:"—",12:"—",13:"—",14:"—",15:"—",16:"—",17:"—",18:"—",19:"—",20:"—",21:"—",22:"—"};
+    // ====== Рендер Биоритмов ======
+    async function renderBioHome(){
+      show('#bioMainCard', true);
+      show('#bioBtnsCard', true);
 
-/* ===================== ЛОГИКА UI ===================== */
-const $ = (id)=>document.getElementById(id);
+      const num = calcYearlyNumber(profile.birth_date);
+      const text = appData?.YEARLY?.[String(num)] || 'Нет данных.';
+      $('#yearlyBlock').innerHTML = `
+        <div class="pill">Ваш номер биоритма: <b class="hl">${num ?? '—'}</b></div>
+        <div class="spacer"></div>
+        <div>${text}</div>
+      `;
+    }
 
-$('b22_calc').onclick = () => {
-  const day = Number($('b22_day').value);
-  const month = Number($('b22_month').value);
-  const status = $('b22_status');
+    // ====== Категории ======
+    const CAT_TITLES = {
+      MONTHLY:   'Биоритмы по месяцам',
+      HERBS:     'Фитотерапия по месяцам',
+      NUTRITION: 'Питание по месяцам',
+      VITAMINS:  'Витамины по месяцам',
+      MINERALS:  'Минералы по месяцам',
+      OILS:      'Эфирные масла по месяцам',
+      SUPPLEMENTS:'БАДы по месяцам'
+    };
 
-  if (!day || !month){
-    status.textContent = 'Укажите день и месяц рождения.';
-    status.className = 'err';
-    return;
-  }
+    function openCategory(key){
+      currentCategoryKey = key;
+      $('#catTitle').textContent = CAT_TITLES[key] || 'Раздел';
+      $('#monthSelect').value = String(new Date().getUTCMonth()+1);
+      renderCategoryResult();
+      show('#bioHomeSec', false);
+      show('#categorySec', true);
+    }
 
-  const general = computeGeneral2025(day, month);
-  $('b22_general').textContent = general;
-
-  $('b22_results').classList.remove('hidden');
-  status.textContent = 'Готово ✅';
-  status.className = 'ok';
-
-  recalcSelectedMonth();
-};
-
-$('b22_sel_month').onchange = recalcSelectedMonth;
-
-function recalcSelectedMonth(){
-  const day = Number($('b22_day').value);
-  const month = Number($('b22_month').value);
-  const mSel = Number($('b22_sel_month').value);
-
-  const val = computeMonthlyValue(day, month, mSel);
-  $('b22_month_value').textContent = val ?? '—';
-
-  $('b22_m_biorhythm').textContent = val ? (MAP_BIORHYTHM_MONTH[val] || '—') : '—';
-  $('b22_m_herbs').textContent     = val ? (MAP_HERBS[val]            || '—') : '—';
-  $('b22_m_nutrition').textContent = val ? (MAP_NUTRITION[val]        || '—') : '—';
-  $('b22_m_vitamins').textContent  = val ? (MAP_VITAMINS[val]         || '—') : '—';
-  $('b22_m_minerals').textContent  = val ? (MAP_MINERALS[val]         || '—') : '—';
-  $('b22_m_oils').textContent      = val ? (MAP_OILS[val]             || '—') : '—';
-}
-</script>
+    function renderCategoryResult(){
+      const key = currentCategoryKey;
+      if(!key) return;
+      const m = Number($('#monthSelect').value);
+      const num = calcMonthlyNumber(profile.birth_date, m);
+      const dataset = appData?.[key] || {};
+      const text = dataset[String(num)] || 'Нет данных.';
+      $('#catResult').innerHTML = `
+        <div class="pill">Месяц: ${m}</div>
+        <div class="spacer"></div>
+        <div class="pill">Ваш номер биоритма: <b class="hl">${num ?? '—'}</b></div>
+        <div class="spacer"></div>
+        <div>${text}</div>
+      `;
+    }
+  </script>
 </body>
 </html>
+
