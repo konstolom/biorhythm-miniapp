@@ -162,11 +162,11 @@
     // ====== Настройки Supabase Edge ======
     const SUPABASE_URL = "https://evqracwzgotothjelcdl.supabase.co";   // ← замените
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM";                 // ← замените
-    const FN = (name) => `${SUPABASE_URL}/functions/v1/${name}`;
+    const FN = (name) => `${https://evqracwzgotothjelcdl.supabase.co}/functions/v1/${name}`;
     const headers = {
       "Content-Type":"application/json",
-      "authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "apikey": SUPABASE_ANON_KEY
+      "authorization": `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM}`,
+      "apikey": eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM
     };
 
     // ====== Состояние ======
