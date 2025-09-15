@@ -224,26 +224,51 @@
       }
     }
 
-    // ====== Сохранить дату рождения (однократно) ======
+    // ====== Сохранить дату рождения (однократно) — версия с подробной диагностикой ======
     async function saveBirth(){
       const birth = $('#birthInput').value;
       if(!birth){ $('#birthMsg').textContent='Выберите дату рождения.'; return; }
       $('#birthMsg').textContent='Сохраняем…';
       try{
-        const resp = await fetch(FN('set-birthdate'), { method:'POST', headers, body: JSON.stringify({ email: profile.email, birth_date: birth }) });
-        const data = await resp.json();
+        const resp = await fetch(FN('set-birthdate'), {
+          method:'POST',
+          headers,
+          body: JSON.stringify({ email: profile.email, birth_date: birth })
+        });
+        const raw = await resp.text();
+        let data;
+        try { data = JSON.parse(raw); } catch { data = { ok:false, error: raw || 'Неизвестная ошибка' }; }
+
         if(!resp.ok || !data.ok){
-          $('#birthMsg').textContent = (data && data.error) ? data.error : 'Ошибка';
+          const msg = (data && (data.error || data.message)) ? data.error || data.message : `HTTP ${resp.status}`;
+          $('#birthMsg').textContent = 'Ошибка сохранения: ' + msg;
+          console.error('set-birthdate error:', resp.status, data);
           return;
         }
+
+        // Обновим профиль локально
         profile = { ...profile, ...data.profile };
+
+        // На всякий случай перезапросим профиль из БД
+        const resp2 = await fetch(FN('app-login'), {
+          method:'POST',
+          headers,
+          body: JSON.stringify({ email: profile.email })
+        });
+        const data2 = await resp2.json().catch(()=>null);
+        if(resp2.ok && data2?.ok && data2.profile){
+          profile = data2.profile;
+        }
+
         await loadDictionary();
         fillProfileUI();
         enableMenu();
         show('#birthSec',false);
         route('profile');
+        $('#birthMsg').textContent = '';
       }catch(e){
-        $('#birthMsg').textContent = String(e.message || e);
+        $('#birthMsg').textContent = 'Ошибка: ' + String(e.message || e);
+        console.error(e);
       }
     }
 
@@ -336,4 +361,5 @@
   </script>
 </body>
 </html>
+
 
