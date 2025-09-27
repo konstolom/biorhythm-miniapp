@@ -7,14 +7,14 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root { --pad:16px; }
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:var(--tg-theme-secondary-bg-color,#f6f7fb);color:var(--tg-theme-text-color,#111)}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#111}
     .container{max-width:720px;margin:0 auto;padding:var(--pad)}
-    .card{background:var(--tg-theme-bg-color,#fff);border-radius:16px;padding:var(--pad);box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:var(--pad)}
+    .card{background:#fff;border-radius:16px;padding:var(--pad);box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:var(--pad)}
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button{width:100%}
-    input{padding:12px;border-radius:10px;border:1px solid #ddd;background:var(--tg-theme-bg-color,#fff);color:inherit}
-    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;background:var(--tg-theme-button-color,#2ea6ff);color:var(--tg-theme-button-text-color,#fff);cursor:pointer}
+    input{padding:12px;border-radius:10px;border:1px solid #ddd}
+    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;background:#2ea6ff;color:#fff;cursor:pointer}
     .row{display:flex;gap:12px}
     .row > div{flex:1}
     .hidden{display:none}
@@ -92,9 +92,12 @@
 
 </div>
 
+<!-- подключаем данные -->
+<script src="/data.js"></script>
+
+<!-- логика приложения -->
 <script>
 const tg = window.Telegram?.WebApp; tg?.expand?.();
-
 const STATE = { user: null, data: null };
 
 function el(id){ return document.getElementById(id); }
@@ -103,9 +106,17 @@ function fmtDob(iso){ if(!iso) return '—'; const [Y,M,D] = iso.slice(0,10).spl
 function reduceTo22(n){ while(n > 22){ n = String(n).split('').reduce((a,b)=>a + Number(b), 0);} return n; }
 function computeGeneral2025(dobIso){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9); }
 
-async function loadData(){ if(STATE.data) return STATE.data; const res = await fetch('/data.json'); STATE.data = await res.json(); return STATE.data; }
+async function loadData(){
+  if (STATE.data) return STATE.data;
+  if (!window.APP_DATA) throw new Error('APP_DATA not found');
+  STATE.data = window.APP_DATA;
+  return STATE.data;
+}
 
-async function verify(email, dobIso){ const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`); return r.json(); }
+async function verify(email, dobIso){
+  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`);
+  return r.json();
+}
 
 el('login').onclick = async () => {
   const email = el('email').value.trim().toLowerCase();
@@ -128,24 +139,29 @@ el('login').onclick = async () => {
 };
 
 el('btnYear').onclick = async () => {
-  el('userName2').textContent = STATE.user?.name || '—';
-  el('userDob2').textContent = fmtDob(STATE.user?.dob);
+  try {
+    el('userName2').textContent = STATE.user?.name || '—';
+    el('userDob2').textContent  = fmtDob(STATE.user?.dob);
 
-  const num = computeGeneral2025(STATE.user.dob);
-  el('yearTitle').textContent = `Ваш биоритм 2025 года = ${num}`;
+    const num = computeGeneral2025(STATE.user.dob);
+    el('yearTitle').textContent = `Ваш биоритм 2025 года = ${num}`;
 
-  const DATA = await loadData();
-  const desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
-  el('yearDesc').textContent = desc;
+    const DATA = await loadData();
+    const desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
+    el('yearDesc').textContent = desc;
 
-  show('year');
+    show('year');
+  } catch (err) {
+    console.error('btnYear error:', err);
+    alert('Ошибка при открытии раздела. Подробности в консоли.');
+  }
 };
+
 el('backHome').onclick = () => show('home');
 el('profileBtn').onclick = () => alert('Профиль добавим в следующей итерации 😊');
 </script>
 </body>
 </html>
-
 
 
 
