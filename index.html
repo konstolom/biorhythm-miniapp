@@ -1,366 +1,151 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ваши биоритмы</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Биоритмы · Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root{ --bg:#0f1115; --card:#171a22; --muted:#9aa4b2; --text:#e8edf2; --accent:#6ee7b7; --danger:#f87171; --btn:#222738; --btn-h:#32384d; --br:14px; }
-    *{box-sizing:border-box}
-    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text)}
-    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(120%) blur(8px); background:rgba(15,17,21,.7); border-bottom:1px solid #222}
-    .wrap{max-width:900px; margin:0 auto; padding:20px}
-    .brand{font-weight:800; letter-spacing:.3px}
-    .menu{display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap}
-    .menu button{background:var(--btn); color:var(--text); border:1px solid #2a3042; padding:10px 14px; border-radius:10px; cursor:pointer}
-    .menu button:hover{background:var(--btn-h)}
-    .container{max-width:900px; margin:30px auto; padding:0 20px}
-    .card{background:var(--card); border:1px solid #222738; border-radius:var(--br); padding:18px; box-shadow:0 4px 16px rgba(0,0,0,.25); margin-bottom:20px}
-    .hidden{display:none!important}
-    h2{margin:0 0 12px 0; font-size:22px}
-    label{display:block; margin:10px 0 6px}
-    input, select{width:100%; padding:10px 12px; background:#0c0f14; border:1px solid #2a3042; color:var(--text); border-radius:10px}
-    input[disabled]{opacity:.8; cursor:not-allowed}
-    .btn{background:linear-gradient(180deg,#2b3348,#23293b); border:1px solid #343c56; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer}
-    .grid-btns{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
-    .pill{display:inline-block; font-size:12px; background:#0c0f14; border:1px solid #2a3042; padding:4px 8px; border-radius:999px; color:var(--muted)}
-    .hl{color:var(--accent)}
-    .muted{color:var(--muted)}
-    .danger{background:#2a1212; border:1px solid #522; color:#ffcccc}
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-    .row > *{flex:1 1 260px}
-    .spacer{height:8px}
-    .backbar{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+    :root { --pad:16px; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:var(--tg-theme-secondary-bg-color,#f6f7fb);color:var(--tg-theme-text-color,#111)}
+    .container{max-width:720px;margin:0 auto;padding:var(--pad)}
+    .card{background:var(--tg-theme-bg-color,#fff);border-radius:16px;padding:var(--pad);box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:var(--pad)}
+    h1,h2,h3{margin:0 0 10px}
+    label{display:block;margin:10px 0 6px}
+    input,button{width:100%}
+    input{padding:12px;border-radius:10px;border:1px solid #ddd;background:var(--tg-theme-bg-color,#fff);color:inherit}
+    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;background:var(--tg-theme-button-color,#2ea6ff);color:var(--tg-theme-button-text-color,#fff);cursor:pointer}
+    .row{display:flex;gap:12px}
+    .row > div{flex:1}
+    .hidden{display:none}
+    .ok{color:#1a7f37;font-weight:600}
+    .err{color:#b91c1c;font-weight:600}
+    header, footer{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+    header .left, header .right{font-size:14px;opacity:.9}
+    header .left b{cursor:pointer}
+    .menu{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
+    .menu button{background:#fff;color:#111;border:1px solid #eee}
+    .menu button:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    .muted{opacity:.8}
+    .support{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .back{background:#fff;color:#111;border:1px solid #eee}
+    .desc{white-space:pre-wrap;line-height:1.5}
+    .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px;margin-left:8px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">Ваши биоритмы</div>
-      <div class="menu">
-        <button id="menu-profile" class="btn" onclick="route('profile')" disabled>Анкета</button>
-        <button id="menu-bio" class="btn" onclick="route('bio')" disabled>Биоритмы</button>
-        <span class="pill" id="userEmailPill"></span>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="logout()" id="logoutBtn" disabled>Выйти</button>
+<div class="container">
+
+  <!-- AUTH -->
+  <section id="auth" class="card">
+    <h2>Вход</h2>
+    <p class="muted">Для доступа к вашим биоритмам введите вашу почту и дату рождения</p>
+    <label>Ваш email</label>
+    <input id="email" type="email" placeholder="you@example.com" />
+    <label>Ваша дата рождения</label>
+    <input id="dob" type="date" />
+    <button id="login">Войти</button>
+    <p id="auth_status"></p>
+  </section>
+
+  <!-- HOME -->
+  <section id="home" class="hidden">
+    <header>
+      <div class="left"><b id="profileBtn">профиль</b></div>
+      <div class="right"><span id="userName">—</span><span class="tag" id="userDob">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Выберите раздел, который вы хотели бы изучить</h2>
+      <div class="menu" style="margin-top:12px">
+        <button id="btnYear">Биоритмы 2025 года</button>
+        <button disabled>Биоритмы по месяцам</button>
+        <button disabled>Фитотерапия по месяцам</button>
+        <button disabled>Минералы по месяцам</button>
+        <button disabled>Витамины по месяцам</button>
+        <button disabled>Эфирные масла по месяцам</button>
+        <button disabled>БАДы по месяцам</button>
       </div>
     </div>
-  </header>
 
-  <main class="container">
-    <!-- 1) Email -->
-    <section id="emailSec" class="card">
-      <h2>Введите ваш email</h2>
-      <div class="row">
-        <div>
-          <label>Email</label>
-          <input id="authEmail" type="email" placeholder="you@example.com" />
-        </div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="emailLogin()">Продолжить</button>
-      <div class="spacer"></div>
-      <div id="emailMsg" class="muted"></div>
-    </section>
+    <footer class="support card">
+      <div class="muted">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button>Тех.поддержка</button>
+      </a>
+    </footer>
+  </section>
 
-    <!-- 2) Однократно: дата рождения -->
-    <section id="birthSec" class="card hidden">
-      <h2>Укажите дату рождения (сохранится навсегда)</h2>
-      <div class="row">
-        <div>
-          <label>Дата рождения</label>
-          <input id="birthInput" type="date" />
-        </div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="saveBirth()">Сохранить навсегда</button>
-      <div class="spacer"></div>
-      <div class="muted">После сохранения изменить дату рождения в приложении будет невозможно (только вручную в БД).</div>
-      <div class="spacer"></div>
-      <div id="birthMsg" class="muted"></div>
-    </section>
+  <!-- YEAR PAGE -->
+  <section id="year" class="hidden">
+    <header>
+      <button class="back" id="backHome">Назад</button>
+      <div class="right"><span id="userName2">—</span><span class="tag" id="userDob2">—</span></div>
+    </header>
 
-    <!-- Анкета -->
-    <section id="profileSec" class="card hidden">
-      <h2>Анкета</h2>
-      <div class="row">
-        <div>
-          <label>Имя</label>
-          <input id="fName" />
-        </div>
-        <div>
-          <label>Город рождения</label>
-          <input id="fCity" />
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label>Дата рождения (зафиксирована)</label>
-          <input id="fBirthDate" disabled />
-        </div>
-        <div>
-          <label>Подписка до</label>
-          <input id="fSubEnd" disabled />
-        </div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="saveProfile()">Сохранить</button>
-      <div class="spacer"></div>
-      <div id="profileMsg" class="muted"></div>
-    </section>
+    <div class="card">
+      <h2 id="yearTitle">Ваш биоритм 2025 года = —</h2>
+      <div id="yearDesc" class="desc muted" style="margin-top:8px"></div>
+    </div>
+  </section>
 
-    <!-- Биоритмы: главная -->
-    <section id="bioHomeSec" class="hidden">
-      <div id="bioMainCard" class="card hidden">
-        <h2>Ваши биоритмы на 2025 год</h2>
-        <div id="yearlyBlock">Загрузка…</div>
-      </div>
+</div>
 
-      <div id="bioBtnsCard" class="card hidden">
-        <h3>Разделы</h3>
-        <div class="grid-btns">
-          <button class="btn" onclick="openCategory('MONTHLY')">Биоритмы по месяцам</button>
-          <button class="btn" onclick="openCategory('HERBS')">Фитотерапия по месяцам</button>
-          <button class="btn" onclick="openCategory('NUTRITION')">Питание по месяцам</button>
-          <button class="btn" onclick="openCategory('VITAMINS')">Витамины по месяцам</button>
-          <button class="btn" onclick="openCategory('MINERALS')">Минералы по месяцам</button>
-          <button class="btn" onclick="openCategory('OILS')">Эфирные масла по месяцам</button>
-          <button class="btn" onclick="openCategory('SUPPLEMENTS')">БАДы по месяцам</button>
-        </div>
-      </div>
-    </section>
+<script>
+const tg = window.Telegram?.WebApp; tg?.expand?.();
 
-    <!-- Страница категории -->
-    <section id="categorySec" class="hidden">
-      <div class="card">
-        <div class="backbar">
-          <button class="btn" onclick="backToBio()">← Назад</button>
-          <h2 id="catTitle" style="margin:0"></h2>
-        </div>
-        <div class="row">
-          <div>
-            <label>Месяц</label>
-            <select id="monthSelect" onchange="renderCategoryResult()">
-              <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
-              <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
-              <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
-              <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
-            </select>
-          </div>
-          <div style="align-self:flex-end">
-            <button class="btn" onclick="renderCategoryResult()">Рассчитать</button>
-          </div>
-        </div>
-      </div>
-      <div id="catResultCard" class="card">
-        <div id="catResult">Выберите месяц для расчёта…</div>
-      </div>
-    </section>
-  </main>
+const STATE = { user: null, data: null };
 
-  <script>
-    // ====== Настройки Supabase Edge ======
-    const SUPABASE_URL = "https://evqracwzgotothjelcdl.supabase.co";   // ← замените
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM";                 // ← замените
-    const FN = (name) => `${https://evqracwzgotothjelcdl.supabase.co}/functions/v1/${name}`;
-    const headers = {
-      "Content-Type":"application/json",
-      "authorization": `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM}`,
-      "apikey": eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXJhY3d6Z290b3RoamVsY2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjQ2ODIsImV4cCI6MjA3MzQ0MDY4Mn0.Zh7uBorT9iIDLR9H_da7KXGgsF0sIMSZKOSVqyCuOFM
-    };
+function el(id){ return document.getElementById(id); }
+function show(id){ for (const s of ['auth','home','year']) el(s).classList.add('hidden'); el(id).classList.remove('hidden'); }
+function fmtDob(iso){ if(!iso) return '—'; const [Y,M,D] = iso.slice(0,10).split('-'); return `${D}.${M}.${Y}`; }
+function reduceTo22(n){ while(n > 22){ n = String(n).split('').reduce((a,b)=>a + Number(b), 0);} return n; }
+function computeGeneral2025(dobIso){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9); }
 
-    // ====== Состояние ======
-    let appData = null;  // data.json
-    let profile = null;  // {email,name,birth_city,birth_date,subscription_end}
-    let currentCategoryKey = null;
+async function loadData(){ if(STATE.data) return STATE.data; const res = await fetch('/data.json'); STATE.data = await res.json(); return STATE.data; }
 
-    // ====== Утилиты ======
-    const $ = s => document.querySelector(s);
-    const show = (sel, on=true)=> { const el=$(sel); if(!el) return; el.classList.toggle('hidden', !on); };
-    function enableMenu(){ $('#menu-profile').disabled=false; $('#menu-bio').disabled=false; $('#logoutBtn').disabled=false; }
-    function disableMenu(){ $('#menu-profile').disabled=true; $('#menu-bio').disabled=true; $('#logoutBtn').disabled=true; }
-    function logout(){ profile=null; $('#userEmailPill').textContent=''; disableMenu(); show('#emailSec',true); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',false); show('#categorySec',false); }
+async function verify(email, dobIso){ const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`); return r.json(); }
 
-    function route(where){
-      if(!profile){ show('#emailSec',true); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',false); show('#categorySec',false); return; }
-      if(where==='profile'){ show('#emailSec',false); show('#birthSec',false); show('#profileSec',true); show('#bioHomeSec',false); show('#categorySec',false); }
-      if(where==='bio'){ show('#emailSec',false); show('#birthSec',false); show('#profileSec',false); show('#bioHomeSec',true); show('#categorySec',false); renderBioHome(); }
-    }
-    function backToBio(){ route('bio'); }
+el('login').onclick = async () => {
+  const email = el('email').value.trim().toLowerCase();
+  const dob = el('dob').value;
+  const st = el('auth_status');
+  if(!email || !dob){ st.textContent='Введите e-mail и дату рождения'; st.className='err'; return; }
+  st.textContent='Проверяем...'; st.className='';
 
-    // ====== Загрузка словаря ======
-    async function loadDictionary(){
-      if(appData) return appData;
-      const res = await fetch('data.json', { cache: 'no-store' });
-      appData = await res.json();
-      return appData;
-    }
+  try{
+    const data = await verify(email, dob);
+    if(!data.ok){ st.textContent = data.error || 'Нет доступа'; st.className='err'; return; }
 
-    // ====== Логин по email ======
-    async function emailLogin(){
-      const email = $('#authEmail').value.trim().toLowerCase();
-      if(!email){ $('#emailMsg').textContent='Введите email.'; return; }
-      $('#emailMsg').textContent='Загружаем профиль…';
-      try{
-        const resp = await fetch(FN('app-login'), { method:'POST', headers, body: JSON.stringify({ email }) });
-        const data = await resp.json();
-        if(!resp.ok || !data.ok) throw new Error(data.error || 'Ошибка');
+    STATE.user = { email: data.user?.email || email, name: data.user?.name || 'Без имени', dob: (data.user?.dob || dob).slice(0,10) };
+    el('userName').textContent = STATE.user.name;
+    el('userDob').textContent = fmtDob(STATE.user.dob);
 
-        profile = data.profile;
-        $('#userEmailPill').textContent = profile.email || '';
-        $('#emailMsg').textContent = '';
+    show('home');
+    tg?.MainButton?.hide?.();
+  }catch(e){ st.textContent='Ошибка соединения'; st.className='err'; }
+};
 
-        if(!profile.birth_date){
-          show('#emailSec',false); show('#birthSec',true); disableMenu();
-          return;
-        }
+el('btnYear').onclick = async () => {
+  el('userName2').textContent = STATE.user?.name || '—';
+  el('userDob2').textContent = fmtDob(STATE.user?.dob);
 
-        await loadDictionary();
-        fillProfileUI();
-        enableMenu();
-        route('profile');
-      }catch(e){
-        $('#emailMsg').textContent = String(e.message || e);
-      }
-    }
+  const num = computeGeneral2025(STATE.user.dob);
+  el('yearTitle').textContent = `Ваш биоритм 2025 года = ${num}`;
 
-    // ====== Сохранить дату рождения (однократно) — версия с подробной диагностикой ======
-    async function saveBirth(){
-      const birth = $('#birthInput').value;
-      if(!birth){ $('#birthMsg').textContent='Выберите дату рождения.'; return; }
-      $('#birthMsg').textContent='Сохраняем…';
-      try{
-        const resp = await fetch(FN('set-birthdate'), {
-          method:'POST',
-          headers,
-          body: JSON.stringify({ email: profile.email, birth_date: birth })
-        });
-        const raw = await resp.text();
-        let data;
-        try { data = JSON.parse(raw); } catch { data = { ok:false, error: raw || 'Неизвестная ошибка' }; }
+  const DATA = await loadData();
+  const desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
+  el('yearDesc').textContent = desc;
 
-        if(!resp.ok || !data.ok){
-          const msg = (data && (data.error || data.message)) ? data.error || data.message : `HTTP ${resp.status}`;
-          $('#birthMsg').textContent = 'Ошибка сохранения: ' + msg;
-          console.error('set-birthdate error:', resp.status, data);
-          return;
-        }
-
-        // Обновим профиль локально
-        profile = { ...profile, ...data.profile };
-
-        // На всякий случай перезапросим профиль из БД
-        const resp2 = await fetch(FN('app-login'), {
-          method:'POST',
-          headers,
-          body: JSON.stringify({ email: profile.email })
-        });
-        const data2 = await resp2.json().catch(()=>null);
-        if(resp2.ok && data2?.ok && data2.profile){
-          profile = data2.profile;
-        }
-
-        await loadDictionary();
-        fillProfileUI();
-        enableMenu();
-        show('#birthSec',false);
-        route('profile');
-        $('#birthMsg').textContent = '';
-      }catch(e){
-        $('#birthMsg').textContent = 'Ошибка: ' + String(e.message || e);
-        console.error(e);
-      }
-    }
-
-    // ====== Анкета ======
-    function fillProfileUI(){
-      $('#fName').value = profile.name || '';
-      $('#fCity').value = profile.birth_city || '';
-      $('#fBirthDate').value = profile.birth_date || '';
-      $('#fSubEnd').value = profile.subscription_end || '';
-    }
-
-    async function saveProfile(){
-      if(!profile?.email) return;
-      const body = {
-        email: profile.email,
-        name: $('#fName').value.trim() || null,
-        birth_city: $('#fCity').value.trim() || null
-      };
-      const resp = await fetch(FN('update-profile'), { method:'POST', headers, body: JSON.stringify(body) });
-      const data = await resp.json();
-      if(!resp.ok || !data.ok){ $('#profileMsg').textContent = data.error || 'Ошибка'; return; }
-      profile = { ...profile, ...data.profile };
-      $('#profileMsg').textContent = 'Анкета сохранена ✅';
-    }
-
-    // ====== Математика ======
-    function reduceTo22(n){ while(n>22){ n=String(n).split('').map(Number).reduce((a,b)=>a+b,0); } return n; }
-    function calcYearlyNumber(birthISO){
-      if(!birthISO) return null;
-      const d = new Date(birthISO);
-      const day = d.getUTCDate(), month = d.getUTCMonth()+1;
-      return reduceTo22(day + month + 9);
-    }
-    function calcMonthlyNumber(birthISO, mm){
-      if(!birthISO) return null;
-      const d = new Date(birthISO);
-      const day = d.getUTCDate(), month = d.getUTCMonth()+1;
-      return reduceTo22(day + month + 9 + Number(mm));
-    }
-
-    // ====== Рендер Биоритмов ======
-    async function renderBioHome(){
-      show('#bioMainCard', true);
-      show('#bioBtnsCard', true);
-
-      const num = calcYearlyNumber(profile.birth_date);
-      const text = appData?.YEARLY?.[String(num)] || 'Нет данных.';
-      $('#yearlyBlock').innerHTML = `
-        <div class="pill">Ваш номер биоритма: <b class="hl">${num ?? '—'}</b></div>
-        <div class="spacer"></div>
-        <div>${text}</div>
-      `;
-    }
-
-    // ====== Категории ======
-    const CAT_TITLES = {
-      MONTHLY:   'Биоритмы по месяцам',
-      HERBS:     'Фитотерапия по месяцам',
-      NUTRITION: 'Питание по месяцам',
-      VITAMINS:  'Витамины по месяцам',
-      MINERALS:  'Минералы по месяцам',
-      OILS:      'Эфирные масла по месяцам',
-      SUPPLEMENTS:'БАДы по месяцам'
-    };
-
-    function openCategory(key){
-      currentCategoryKey = key;
-      $('#catTitle').textContent = CAT_TITLES[key] || 'Раздел';
-      $('#monthSelect').value = String(new Date().getUTCMonth()+1);
-      renderCategoryResult();
-      show('#bioHomeSec', false);
-      show('#categorySec', true);
-    }
-
-    function renderCategoryResult(){
-      const key = currentCategoryKey;
-      if(!key) return;
-      const m = Number($('#monthSelect').value);
-      const num = calcMonthlyNumber(profile.birth_date, m);
-      const dataset = appData?.[key] || {};
-      const text = dataset[String(num)] || 'Нет данных.';
-      $('#catResult').innerHTML = `
-        <div class="pill">Месяц: ${m}</div>
-        <div class="spacer"></div>
-        <div class="pill">Ваш номер биоритма: <b class="hl">${num ?? '—'}</b></div>
-        <div class="spacer"></div>
-        <div>${text}</div>
-      `;
-    }
-  </script>
+  show('year');
+};
+el('backHome').onclick = () => show('home');
+el('profileBtn').onclick = () => alert('Профиль добавим в следующей итерации 😊');
+</script>
 </body>
 </html>
+
 
 
 
