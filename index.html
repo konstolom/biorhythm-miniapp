@@ -13,30 +13,35 @@
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button,select{width:100%}
+    /* дата */
     .date-row{display:flex;gap:8px}
     .date-row select{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     input{padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     /* кнопки */
     button{padding:14px 18px;border:0;border-radius:14px;font-weight:700;font-size:16px;line-height:1.2;cursor:pointer;background:#2ea6ff;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
     button .ico{font-size:20px;line-height:1}
-    /* сетки меню */
+    /* меню на главной */
     .menu{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
     .menu button{background:#fff;color:#111;border:1px solid #eee}
     .menu button:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    /* сетка месяцев */
     .months{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     @media (min-width:560px){ .months{grid-template-columns:repeat(4,1fr)}}
+    /* стиль кнопок месяца: дефолт — синие; активная — белая с синей обводкой */
+    .mBtn{background:#2ea6ff;color:#fff;border:2px solid #2ea6ff}
+    .mBtn.active{background:#fff;color:#111;border:2px solid #2ea6ff}
     .hidden{display:none}
     .ok{color:#1a7f37;font-weight:600}
     .err{color:#b91c1c;font-weight:600}
     .muted{opacity:.8}
-    /* безопасный хедер */
+    /* хедер */
     header{display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:12px;flex-wrap:wrap}
     header .left{display:flex;align-items:center;gap:8px}
     header .right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:0}
-    header .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+    .nameSpan{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
     .back{background:#fff;color:#111;border:1px solid #eee;padding:10px 14px;border-radius:12px;font-weight:600}
-    /* абзацы описаний */
+    /* описания */
     .desc p{margin:0 0 12px 0;text-indent:1.5em}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px}
     /* футер */
@@ -80,7 +85,7 @@
         <button class="back" id="profileBtn" title="Профиль"><span class="ico">👤</span>профиль</button>
       </div>
       <div class="right">
-        <span class="name" id="userName">—</span>
+        <span class="nameSpan" id="userName">—</span>
         <span class="tag" id="userDob">—</span>
       </div>
     </header>
@@ -90,11 +95,11 @@
       <div class="menu" style="margin-top:12px">
         <button id="btnYear"><span class="ico">🗓️</span>Биоритмы 2025 года</button>
         <button id="btnMonths"><span class="ico">📆</span>Биоритмы по месяцам</button>
-        <button disabled><span class="ico">🌿</span>Фитотерапия по месяцам</button>
-        <button disabled><span class="ico">🪨</span>Минералы по месяцам</button>
-        <button disabled><span class="ico">💊</span>Витамины по месяцам</button>
-        <button disabled><span class="ico">🧴</span>Эфирные масла по месяцам</button>
-        <button disabled><span class="ico">🧪</span>БАДы по месяцам</button>
+        <button id="btnHerbs"><span class="ico">🌿</span>Фитотерапия по месяцам</button>
+        <button id="btnMinerals"><span class="ico">🪨</span>Минералы по месяцам</button>
+        <button id="btnVitamins"><span class="ico">💊</span>Витамины по месяцам</button>
+        <button id="btnOils"><span class="ico">🧴</span>Эфирные масла по месяцам</button>
+        <button id="btnSupplements"><span class="ico">🧪</span>БАДы по месяцам</button>
       </div>
     </div>
 
@@ -110,7 +115,7 @@
   <section id="year" class="hidden">
     <header>
       <div class="left"><button class="back" id="backHome"><span class="ico">⬅️</span>Назад</button></div>
-      <div class="right"><span class="name" id="userName2">—</span><span class="tag" id="userDob2">—</span></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
     </header>
 
     <div class="card" style="text-align:center">
@@ -132,16 +137,18 @@
     </footer>
   </section>
 
-  <!-- MONTHS PAGE -->
-  <section id="month" class="hidden">
+  <!-- MONTH TEMPLATES (6 разделов, одинаковая структура) -->
+  <!-- 1) Биоритмы по месяцам -->
+  <section id="sec-monthly" class="hidden">
     <header>
-      <div class="left"><button class="back" id="backHome2"><span class="ico">⬅️</span>Назад</button></div>
-      <div class="right"><span class="name" id="userName3">—</span><span class="tag" id="userDob3">—</span></div>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
     </header>
 
     <div class="card">
-      <h2>Выберите месяц</h2>
+      <h2>Биоритмы по месяцам</h2>
       <div class="months" style="margin-top:12px">
+        <!-- 12 кнопок -->
         <button class="mBtn" data-m="1">Январь</button>
         <button class="mBtn" data-m="2">Февраль</button>
         <button class="mBtn" data-m="3">Март</button>
@@ -157,17 +164,190 @@
       </div>
     </div>
 
-    <!-- результат выбранного месяца -->
-    <div id="monthResult" class="card" style="text-align:center; display:none">
+    <div class="card" id="res-monthly" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">Ваш биоритм <span id="monthName">месяца</span></div>
-        <div id="monthNumber" class="result-pill">—</div>
+        <div class="result-title">Ваш биоритм <span class="mName">месяца</span></div>
+        <div class="result-pill mNum">—</div>
       </div>
     </div>
 
-    <!-- описание -->
-    <div id="monthDescBlock" class="card" style="display:none">
-      <div id="monthDesc" class="desc"></div>
+    <div class="card" id="desc-monthly" style="display:none">
+      <div class="desc mDesc"></div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- 2) Фитотерапия по месяцам -->
+  <section id="sec-herbs" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Фитотерапия по месяцам</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <div class="card" id="res-herbs" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">Фитотерапия — <span class="mName">месяц</span></div>
+        <div class="result-pill mNum">—</div>
+      </div>
+    </div>
+
+    <div class="card" id="desc-herbs" style="display:none">
+      <div class="desc mDesc"></div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- 3) Минералы по месяцам -->
+  <section id="sec-minerals" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Минералы по месяцам</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <div class="card" id="res-minerals" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">Минералы — <span class="mName">месяц</span></div>
+        <div class="result-pill mNum">—</div>
+      </div>
+    </div>
+
+    <div class="card" id="desc-minerals" style="display:none">
+      <div class="desc mDesc"></div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- 4) Витамины по месяцам -->
+  <section id="sec-vitamins" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Витамины по месяцам</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <div class="card" id="res-vitamins" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">Витамины — <span class="mName">месяц</span></div>
+        <div class="result-pill mNum">—</div>
+      </div>
+    </div>
+
+    <div class="card" id="desc-vitamins" style="display:none">
+      <div class="desc mDesc"></div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- 5) Эфирные масла по месяцам -->
+  <section id="sec-oils" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Эфирные масла по месяцам</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <div class="card" id="res-oils" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">Эфирные масла — <span class="mName">месяц</span></div>
+        <div class="result-pill mNum">—</div>
+      </div>
+    </div>
+
+    <div class="card" id="desc-oils" style="display:none">
+      <div class="desc mDesc"></div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- 6) БАДы по месяцам -->
+  <section id="sec-supplements" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>БАДы по месяцам</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <div class="card" id="res-supplements" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">БАДы — <span class="mName">месяц</span></div>
+        <div class="result-pill mNum">—</div>
+      </div>
+    </div>
+
+    <div class="card" id="desc-supplements" style="display:none">
+      <div class="desc mDesc"></div>
     </div>
 
     <footer class="support card">
@@ -189,7 +369,7 @@ const tg = window.Telegram?.WebApp; tg?.expand?.();
 const STATE = { user: null, data: null };
 
 function el(id){ return document.getElementById(id); }
-function show(id){ for (const s of ['auth','home','year','month']) el(s).classList.add('hidden'); el(id).classList.remove('hidden'); }
+function show(id){ for (const s of ['auth','home','year','sec-monthly','sec-herbs','sec-minerals','sec-vitamins','sec-oils','sec-supplements']) el(s)?.classList.add('hidden'); el(id).classList.remove('hidden'); }
 function fmtDob(iso){ if(!iso) return '—'; const [Y,M,D] = iso.slice(0,10).split('-'); return `${D}.${M}.${Y}`; }
 function reduceTo22(n){ while(n > 22){ n = String(n).split('').reduce((a,b)=>a + Number(b), 0);} return n; }
 function computeGeneral2025(dobIso){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9); }
@@ -221,7 +401,7 @@ function getDOBISO(){
   return `${yy}-${mm}-${dd}`;
 }
 
-/* утилита: делим текст на 2–3 абзаца */
+/* делим текст на 2–3 абзаца */
 function splitIntoParagraphs(text){
   const partsByBreak = text.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
   if (partsByBreak.length >= 2 && partsByBreak.length <= 4) return partsByBreak;
@@ -243,17 +423,27 @@ el('login').onclick = async () => {
     const data = await verify(email, dobIso);
     if(!data.ok){ st.textContent = data.error || 'Нет доступа'; st.className='err'; return; }
     STATE.user = { email: data.user?.email || email, name: data.user?.name || 'Без имени', dob: (data.user?.dob || dobIso).slice(0,10) };
+    document.querySelectorAll('#home .nameSpan').forEach(n=>n.textContent=STATE.user.name);
     el('userName').textContent = STATE.user.name;
     el('userDob').textContent = fmtDob(STATE.user.dob);
     show('home'); tg?.MainButton?.hide?.();
   }catch(e){ st.textContent='Ошибка соединения'; st.className='err'; }
 };
 
+/* вспомогательная: заполнить хедер в секции */
+function fillHeader(sectionId){
+  const sec = el(sectionId);
+  if(!sec) return;
+  const nameSpan = sec.querySelector('.nameSpan');
+  const tagSpan  = sec.querySelector('.tag');
+  if (nameSpan) nameSpan.textContent = STATE.user?.name || '—';
+  if (tagSpan)  tagSpan.textContent  = fmtDob(STATE.user?.dob);
+}
+
 /* YEAR */
 el('btnYear').onclick = async () => {
   try {
-    el('userName2').textContent = STATE.user?.name || '—';
-    el('userDob2').textContent  = fmtDob(STATE.user?.dob);
+    fillHeader('year');
     const num = computeGeneral2025(STATE.user.dob);
     el('yearNumber').textContent = num;
     const DATA = await loadData();
@@ -265,40 +455,71 @@ el('btnYear').onclick = async () => {
 };
 el('backHome').onclick = () => show('home');
 
-/* MONTHS */
-el('btnMonths').onclick = () => {
-  el('userName3').textContent = STATE.user?.name || '—';
-  el('userDob3').textContent  = fmtDob(STATE.user?.dob);
-  show('month');
-};
-el('backHome2').onclick = () => show('home');
-
+/* MONTH SECTIONS — общий обработчик */
 const MONTH_NAMES_FULL = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
 
-async function onPickMonth(m){
-  const num = computeMonthly(STATE.user.dob, m);
-  el('monthName').textContent = MONTH_NAMES_FULL[m-1];
-  el('monthNumber').textContent = num;
+function setupMonthSection(secId, dataKey){
+  const sec = el(secId);
+  const btns = sec.querySelectorAll('.mBtn');
+  const resCard  = sec.querySelector('#res-' + secId.split('sec-')[1]);
+  const descCard = sec.querySelector('#desc-' + secId.split('sec-')[1]);
+  const nameEl = sec.querySelector('.mName');
+  const numEl  = sec.querySelector('.mNum');
+  const descEl = sec.querySelector('.mDesc');
 
-  const DATA = await loadData();
-  let desc = DATA?.MONTHLY?.[String(num)] || 'Описание не найдено.';
-  const paragraphs = splitIntoParagraphs(desc);
-  el('monthDesc').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+  // навешиваем клики
+  btns.forEach(b=>{
+    b.addEventListener('click', async () => {
+      // подсветка активной
+      btns.forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
 
-  // показываем блоки результата/описания (кнопки остаются сверху)
-  el('monthResult').style.display = '';
-  el('monthDescBlock').style.display = '';
+      const m = Number(b.dataset.m);
+      const num = computeMonthly(STATE.user.dob, m);
+      nameEl.textContent = MONTH_NAMES_FULL[m-1];
+      numEl.textContent = num;
 
-  // маленький автоскролл к описанию
-  setTimeout(() => {
-    document.getElementById('monthResult').scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 50);
+      const DATA = await loadData();
+      let desc = DATA?.[dataKey]?.[String(num)] || 'Описание не найдено.';
+      const paragraphs = splitIntoParagraphs(desc);
+      descEl.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+
+      resCard.style.display = '';
+      descCard.style.display = '';
+
+      // автоскролл к результату
+      setTimeout(()=>{ resCard.scrollIntoView({ behavior:'smooth', block:'start' }); }, 40);
+    });
+  });
+
+  // заполняем хедер при входе в секцию
+  fillHeader(secId);
 }
 
-// навесим слушатели на 12 кнопок месяцев
-document.querySelectorAll('.mBtn').forEach(btn=>{
-  btn.addEventListener('click', () => onPickMonth(Number(btn.dataset.m)));
+/* переходы в разделы */
+el('btnMonths').onclick     = () => { fillHeader('sec-monthly'); show('sec-monthly'); };
+el('btnHerbs').onclick      = () => { fillHeader('sec-herbs'); show('sec-herbs'); };
+el('btnMinerals').onclick   = () => { fillHeader('sec-minerals'); show('sec-minerals'); };
+el('btnVitamins').onclick   = () => { fillHeader('sec-vitamins'); show('sec-vitamins'); };
+el('btnOils').onclick       = () => { fillHeader('sec-oils'); show('sec-oils'); };
+el('btnSupplements').onclick= () => { fillHeader('sec-supplements'); show('sec-supplements'); };
+
+/* кнопки "Назад" в секциях */
+document.querySelectorAll('button.back[data-back="home"]').forEach(b=>{
+  b.addEventListener('click', ()=> show('home'));
 });
+el('backHome').onclick = () => show('home');
+
+/* инициализация всех секций по месяцам */
+setupMonthSection('sec-monthly',    'MONTHLY');
+setupMonthSection('sec-herbs',      'HERBS');
+setupMonthSection('sec-minerals',   'MINERALS');
+setupMonthSection('sec-vitamins',   'VITAMINS');
+setupMonthSection('sec-oils',       'OILS');
+setupMonthSection('sec-supplements','SUPPLEMENTS');
+
+/* профиль-заглушка */
+el('profileBtn').onclick = () => alert('Профиль добавим в следующей итерации 😊');
 </script>
 </body>
 </html>
