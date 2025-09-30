@@ -442,9 +442,13 @@ function computeMonthly(dobIso, monthNum){ const [Y,M,D] = dobIso.slice(0,10).sp
 async function loadData(){ if (STATE.data) return STATE.data; if (!window.APP_DATA) throw new Error('APP_DATA not found'); STATE.data = window.APP_DATA; return STATE.data; }
 
 async function verify(email, dobIso){
-  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`);
+  const initData = window.Telegram?.WebApp?.initData || '';
+  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`, {
+    headers: { 'x-telegram-init-data': initData }
+  });
   return r.json();
 }
+
 
 /* селекты даты */
 (function initDOB(){
