@@ -7,9 +7,10 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root { --pad:16px; }
+    *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#111}
     .container{max-width:720px;margin:0 auto;padding:var(--pad)}
-    .card{background:#fff;border-radius:16px;padding:var(--pad);box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:var(--pad)}
+    .card{background:#fff;border-radius:16px;padding:var(--pad);box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:var(--pad);border:1px solid #eee}
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button,select{width:100%}
@@ -20,6 +21,8 @@
     /* кнопки */
     button{padding:14px 18px;border:0;border-radius:14px;font-weight:700;font-size:16px;line-height:1.2;cursor:pointer;background:#2ea6ff;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
     button .ico{font-size:20px;line-height:1}
+    button.back{background:#fff;color:#111;border:1px solid #eee;padding:10px 14px;border-radius:12px;font-weight:600}
+    button[disabled]{opacity:.6;cursor:not-allowed}
     /* меню на главной */
     .menu{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
@@ -28,7 +31,7 @@
     /* сетка месяцев */
     .months{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     @media (min-width:560px){ .months{grid-template-columns:repeat(4,1fr)}}
-    /* стиль кнопок месяца: дефолт — синие; активная — белая с синей обводкой */
+    /* стиль кнопок месяца */
     .mBtn{background:#2ea6ff;color:#fff;border:2px solid #2ea6ff}
     .mBtn.active{background:#fff;color:#111;border:2px solid #2ea6ff}
     .hidden{display:none}
@@ -40,7 +43,6 @@
     header .left{display:flex;align-items:center;gap:8px}
     header .right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:0}
     .nameSpan{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
-    .back{background:#fff;color:#111;border:1px solid #eee;padding:10px 14px;border-radius:12px;font-weight:600}
     /* описания */
     .desc p{margin:0 0 12px 0;text-indent:1.5em}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px}
@@ -48,11 +50,17 @@
     .support{display:flex;gap:8px;align-items:center;justify-content:space-between}
     .support .msg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:70%}
     .support .btn{background:#2ea6ff;color:#fff}
-    /* результат в строку */
+    /* результат */
     .result-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:nowrap}
     .result-title{font-weight:800;font-size:20px}
     .result-pill{display:inline-block;font-weight:800;padding:10px 18px;border:3px solid #2ea6ff;border-radius:14px;color:#2ea6ff;font-size:28px;line-height:1}
     @media (min-width:560px){ .result-title{font-size:22px} .result-pill{font-size:32px} }
+
+    /* Профиль: чекбоксы */
+    .checks{display:grid;grid-template-columns:1fr;gap:8px}
+    @media (min-width:560px){ .checks{grid-template-columns:1fr 1fr} }
+    .checks label{display:flex;align-items:center;gap:8px;border:1px solid #eee;border-radius:12px;padding:10px 12px;background:#fff}
+    .checks input{width:auto}
   </style>
 </head>
 <body>
@@ -75,7 +83,7 @@
 
     <div style="height:16px"></div>
     <button id="login"><span class="ico">🔓</span>Войти</button>
-    <p id="auth_status"></p>
+    <p id="auth_status" aria-live="polite"></p>
   </section>
 
   <!-- HOME -->
@@ -137,8 +145,7 @@
     </footer>
   </section>
 
-  <!-- MONTH TEMPLATES (6 разделов, одинаковая структура) -->
-  <!-- 1) Биоритмы по месяцам -->
+  <!-- MONTH SECTIONS -->
   <section id="sec-monthly" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -148,7 +155,6 @@
     <div class="card">
       <h2>Биоритмы по месяцам</h2>
       <div class="months" style="margin-top:12px">
-        <!-- 12 кнопок -->
         <button class="mBtn" data-m="1">Январь</button>
         <button class="mBtn" data-m="2">Февраль</button>
         <button class="mBtn" data-m="3">Март</button>
@@ -183,7 +189,6 @@
     </footer>
   </section>
 
-  <!-- 2) Фитотерапия по месяцам -->
   <section id="sec-herbs" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -201,7 +206,7 @@
 
     <div class="card" id="res-herbs" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">Фитотерапия — <span class="mName">месяц</span></div>
+        <div class="result-title">Фитотерапия <span class="mName">месяц</span></div>
         <div class="result-pill mNum">—</div>
       </div>
     </div>
@@ -218,7 +223,6 @@
     </footer>
   </section>
 
-  <!-- 3) Минералы по месяцам -->
   <section id="sec-minerals" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -236,7 +240,7 @@
 
     <div class="card" id="res-minerals" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">Минералы — <span class="mName">месяц</span></div>
+        <div class="result-title">Минералы <span class="mName">месяц</span></div>
         <div class="result-pill mNum">—</div>
       </div>
     </div>
@@ -253,7 +257,6 @@
     </footer>
   </section>
 
-  <!-- 4) Витамины по месяцам -->
   <section id="sec-vitamins" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -265,13 +268,13 @@
       <div class="months" style="margin-top:12px">
         <button class="mBtn" data-m="1">Январь</button><button class="mBtn" data-m="2">Февраль</button><button class="mBtn" data-m="3">Март</button><button class="mBtn" data-m="4">Апрель</button>
         <button class="mBtn" data-m="5">Май</button><button class="mBtn" data-m="6">Июнь</button><button class="mBtn" data-m="7">Июль</button><button class="mBtn" data-m="8">Август</button>
-        <button class="mBtn" data-m="9">Сентябрь</button><button class="mBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
+        <button class="mBtn" data-m="9">Сентябрь</button><button class="мBtn" data-m="10">Октябрь</button><button class="mBtn" data-m="11">Ноябрь</button><button class="mBtn" data-m="12">Декабрь</button>
       </div>
     </div>
 
     <div class="card" id="res-vitamins" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">Витамины — <span class="mName">месяц</span></div>
+        <div class="result-title">Витамины <span class="mName">месяц</span></div>
         <div class="result-pill mNum">—</div>
       </div>
     </div>
@@ -288,7 +291,6 @@
     </footer>
   </section>
 
-  <!-- 5) Эфирные масла по месяцам -->
   <section id="sec-oils" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -306,7 +308,7 @@
 
     <div class="card" id="res-oils" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">Эфирные масла — <span class="mName">месяц</span></div>
+        <div class="result-title">Эфирные масла <span class="mName">месяц</span></div>
         <div class="result-pill mNum">—</div>
       </div>
     </div>
@@ -323,7 +325,6 @@
     </footer>
   </section>
 
-  <!-- 6) БАДы по месяцам -->
   <section id="sec-supplements" class="hidden">
     <header>
       <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
@@ -341,7 +342,7 @@
 
     <div class="card" id="res-supplements" style="text-align:center; display:none">
       <div class="result-row">
-        <div class="result-title">БАДы — <span class="mName">месяц</span></div>
+        <div class="result-title">БАДы <span class="mName">месяц</span></div>
         <div class="result-pill mNum">—</div>
       </div>
     </div>
@@ -358,18 +359,81 @@
     </footer>
   </section>
 
+  <!-- PROFILE (анкета) -->
+  <section id="profile" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2><span id="welcomeName">—</span>, добро пожаловать!</h2>
+      <p class="muted">Чтобы перейти к вашим биоритмам — заполните небольшую анкету.</p>
+    </div>
+
+    <div class="card">
+      <label>Где вы родились?</label>
+      <input id="q_birthplace" type="text" placeholder="Город, страна" />
+
+      <label style="margin-top:16px">Отметьте перенесенные вами заболевания</label>
+      <div id="q_self" class="checks"></div>
+
+      <label style="margin-top:16px">Отметьте заболевания, перенесенные вашими родителями</label>
+      <div id="q_parents" class="checks"></div>
+
+      <label style="margin-top:16px">Замечаете ли вы ухудшение самочувствия по сезонам?</label>
+      <div id="q_seasons" class="checks"></div>
+
+      <label style="margin-top:16px">Отметьте инфекции, перенесенные вами в детстве</label>
+      <div id="q_infections" class="checks"></div>
+
+      <div style="height:16px"></div>
+      <button id="profileSave"><span class="ico">💾</span>Сохранить</button>
+      <p id="profile_status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- PROFILE VIEW (только просмотр) -->
+  <section id="profileView" class="hidden">
+    <header>
+      <div class="left"><button class="back" data-back="home"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="nameSpan">—</span><span class="tag" id="pvDob">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Ваш профиль</h2>
+      <div class="desc">
+        <p><strong>Место рождения:</strong> <span id="pv_birthplace">—</span></p>
+        <p><strong>Ваши заболевания:</strong> <span id="pv_self">—</span></p>
+        <p><strong>Заболевания родителей:</strong> <span id="pv_parents">—</span></p>
+        <p><strong>Сезоны ухудшения самочувствия:</strong> <span id="pv_seasons">—</span></p>
+        <p><strong>Детские инфекции:</strong> <span id="pv_infections">—</span></p>
+      </div>
+    </div>
+
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
 </div>
 
 <!-- данные -->
 <script src="/data.js"></script>
 
-<!-- логика приложения -->
 <script>
 const tg = window.Telegram?.WebApp; tg?.expand?.();
 const STATE = { user: null, data: null };
 
 function el(id){ return document.getElementById(id); }
-function show(id){ for (const s of ['auth','home','year','sec-monthly','sec-herbs','sec-minerals','sec-vitamins','sec-oils','sec-supplements']) el(s)?.classList.add('hidden'); el(id).classList.remove('hidden'); }
+function show(id){
+  const sections = ['auth','home','year','sec-monthly','sec-herbs','sec-minerals','sec-vitamins','sec-oils','sec-supplements','profile','profileView'];
+  for (const s of sections) el(s)?.classList.add('hidden');
+  el(id).classList.remove('hidden');
+}
 function fmtDob(iso){ if(!iso) return '—'; const [Y,M,D] = iso.slice(0,10).split('-'); return `${D}.${M}.${Y}`; }
 function reduceTo22(n){ while(n > 22){ n = String(n).split('').reduce((a,b)=>a + Number(b), 0);} return n; }
 function computeGeneral2025(dobIso){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9); }
@@ -378,8 +442,7 @@ function computeMonthly(dobIso, monthNum){ const [Y,M,D] = dobIso.slice(0,10).sp
 async function loadData(){ if (STATE.data) return STATE.data; if (!window.APP_DATA) throw new Error('APP_DATA not found'); STATE.data = window.APP_DATA; return STATE.data; }
 
 async function verify(email, dobIso){
-  const initData = window.Telegram?.WebApp?.initData || '';
-  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`, { headers: { 'x-telegram-init-data': initData } });
+  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`);
   return r.json();
 }
 
@@ -401,7 +464,7 @@ function getDOBISO(){
   return `${yy}-${mm}-${dd}`;
 }
 
-/* делим текст на 2–3 абзаца */
+/* делим текст на абзацы */
 function splitIntoParagraphs(text){
   const partsByBreak = text.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
   if (partsByBreak.length >= 2 && partsByBreak.length <= 4) return partsByBreak;
@@ -411,7 +474,77 @@ function splitIntoParagraphs(text){
   else { const third = Math.ceil(sentences.length/3); return [ sentences.slice(0, third).join(' '), sentences.slice(third, third*2).join(' '), sentences.slice(third*2).join(' ') ]; }
 }
 
-/* логин */
+/* вспомогательная: заполнить хедер в секции */
+function fillHeader(sectionId){
+  const sec = el(sectionId);
+  if(!sec) return;
+  const nameSpan = sec.querySelector('.nameSpan');
+  const tagSpan  = sec.querySelector('.tag');
+  if (nameSpan) nameSpan.textContent = STATE.user?.name || '—';
+  if (tagSpan)  tagSpan.textContent  = fmtDob(STATE.user?.dob);
+}
+
+/* ===== Профиль: константы и helpers ===== */
+const DISEASES = [
+  'болезни пищеварения',
+  'болезни половых органов',
+  'болезни почек и мочевого пузыря',
+  'болезни кожи',
+  'болезни лёгких и горла',
+  'болезни глаз',
+  'заболевание центральной нервной системы',
+  'болезни позвоночника и суставов'
+];
+const SEASONS = ['зима','весна','лето','осень'];
+const INFECTIONS = ['корь','краснуха','ветрянка','свинка','скарлатина'];
+
+function renderChecks(container, arr, name){
+  container.innerHTML = arr.map(v => `
+    <label><input type="checkbox" name="${name}" value="${v}"> ${v}</label>
+  `).join('');
+}
+function getChecked(name){
+  return Array.from(document.querySelectorAll(`#profile input[name="${name}"]:checked`)).map(i => i.value);
+}
+function openProfileForm(){
+  fillHeader('profile');
+  el('welcomeName').textContent = STATE.user?.name || 'Гость';
+  renderChecks(el('q_self'), DISEASES, 'self');
+  renderChecks(el('q_parents'), DISEASES, 'parents');
+  renderChecks(el('q_seasons'), SEASONS, 'seasons');
+  renderChecks(el('q_infections'), INFECTIONS, 'infections');
+  el('profile_status').textContent = '';
+  el('q_birthplace').value = '';
+  show('profile');
+}
+function openProfileView(profile){
+  fillHeader('profileView');
+  el('pvDob').textContent = fmtDob(STATE.user?.dob);
+  el('pv_birthplace').textContent = profile.birthplace || '—';
+  el('pv_self').textContent = (profile.diseases_self||[]).join(', ') || '—';
+  el('pv_parents').textContent = (profile.diseases_parents||[]).join(', ') || '—';
+  el('pv_seasons').textContent = (profile.seasons||[]).join(', ') || '—';
+  el('pv_infections').textContent = (profile.infections||[]).join(', ') || '—';
+  show('profileView');
+}
+async function apiGetProfile(){
+  const initData = window.Telegram?.WebApp?.initData || '';
+  const r = await fetch(`/api/profile?email=${encodeURIComponent(STATE.user.email)}`, {
+    headers: { 'x-telegram-init-data': initData }
+  });
+  return r.json();
+}
+async function apiCreateOrUpdateProfile(payload){
+  const initData = window.Telegram?.WebApp?.initData || '';
+  const r = await fetch(`/api/profile`, {
+    method:'PUT',
+    headers: { 'content-type':'application/json','x-telegram-init-data': initData },
+    body: JSON.stringify({ email: STATE.user.email, ...payload })
+  });
+  return r.json();
+}
+
+/* ===== Логин ===== */
 el('login').onclick = async () => {
   const email = el('email').value.trim().toLowerCase();
   const dobIso = getDOBISO();
@@ -426,19 +559,16 @@ el('login').onclick = async () => {
     document.querySelectorAll('#home .nameSpan').forEach(n=>n.textContent=STATE.user.name);
     el('userName').textContent = STATE.user.name;
     el('userDob').textContent = fmtDob(STATE.user.dob);
-    show('home'); tg?.MainButton?.hide?.();
+
+    // Проверка профиля: пустой объект => анкета, иначе главная
+    try{
+      const r = await apiGetProfile();
+      const isEmpty = !r?.profile || Object.keys(r.profile).length === 0;
+      if(r.ok && !isEmpty){ show('home'); }
+      else { openProfileForm(); }
+    }catch(e){ openProfileForm(); }
   }catch(e){ st.textContent='Ошибка соединения'; st.className='err'; }
 };
-
-/* вспомогательная: заполнить хедер в секции */
-function fillHeader(sectionId){
-  const sec = el(sectionId);
-  if(!sec) return;
-  const nameSpan = sec.querySelector('.nameSpan');
-  const tagSpan  = sec.querySelector('.tag');
-  if (nameSpan) nameSpan.textContent = STATE.user?.name || '—';
-  if (tagSpan)  tagSpan.textContent  = fmtDob(STATE.user?.dob);
-}
 
 /* YEAR */
 el('btnYear').onclick = async () => {
@@ -467,32 +597,28 @@ function setupMonthSection(secId, dataKey){
   const numEl  = sec.querySelector('.mNum');
   const descEl = sec.querySelector('.mDesc');
 
-  // навешиваем клики
   btns.forEach(b=>{
     b.addEventListener('click', async () => {
-      // подсветка активной
       btns.forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
 
       const m = Number(b.dataset.m);
       const num = computeMonthly(STATE.user.dob, m);
-      nameEl.textContent = MONTH_NAMES_FULL[m-1];
-      numEl.textContent = num;
+      if(nameEl) nameEl.textContent = MONTH_NAMES_FULL[m-1];
+      if(numEl)  numEl.textContent  = num;
 
       const DATA = await loadData();
       let desc = DATA?.[dataKey]?.[String(num)] || 'Описание не найдено.';
       const paragraphs = splitIntoParagraphs(desc);
-      descEl.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+      if(descEl) descEl.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
 
-      resCard.style.display = '';
-      descCard.style.display = '';
+      if(resCard) resCard.style.display = '';
+      if(descCard) descCard.style.display = '';
 
-      // автоскролл к результату
-      setTimeout(()=>{ resCard.scrollIntoView({ behavior:'smooth', block:'start' }); }, 40);
+      setTimeout(()=>{ resCard?.scrollIntoView({ behavior:'smooth', block:'start' }); }, 40);
     });
   });
 
-  // заполняем хедер при входе в секцию
   fillHeader(secId);
 }
 
@@ -508,7 +634,6 @@ el('btnSupplements').onclick= () => { fillHeader('sec-supplements'); show('sec-s
 document.querySelectorAll('button.back[data-back="home"]').forEach(b=>{
   b.addEventListener('click', ()=> show('home'));
 });
-el('backHome').onclick = () => show('home');
 
 /* инициализация всех секций по месяцам */
 setupMonthSection('sec-monthly',    'MONTHLY');
@@ -518,12 +643,40 @@ setupMonthSection('sec-vitamins',   'VITAMINS');
 setupMonthSection('sec-oils',       'OILS');
 setupMonthSection('sec-supplements','SUPPLEMENTS');
 
-/* профиль-заглушка */
-el('profileBtn').onclick = () => alert('Профиль добавим в следующей итерации 😊');
+/* Профиль: сохранить (PUT) */
+el('profileSave').onclick = async () => {
+  const s = el('profile_status');
+  const btn = el('profileSave');
+  const birthplace = el('q_birthplace').value.trim();
+  const diseases_self = getChecked('self');
+  const diseases_parents = getChecked('parents');
+  const seasons = getChecked('seasons');
+  const infections = getChecked('infections');
+
+  if(!birthplace){ s.textContent='Укажите место рождения'; s.className='err'; return; }
+
+  s.textContent='Сохраняем...'; s.className='muted'; btn.disabled = true;
+  try{
+    const data = await apiCreateOrUpdateProfile({ birthplace, diseases_self, diseases_parents, seasons, infections });
+    if(!data.ok){ s.textContent = 'Ошибка сохранения'; s.className='err'; btn.disabled = false; return; }
+    s.textContent='Сохранено'; s.className='ok';
+    show('home');
+  }catch(e){ s.textContent='Ошибка сети'; s.className='err'; }
+  finally{ btn.disabled = false; }
+};
+
+/* Кнопка «Профиль» на главной */
+el('profileBtn').onclick = async () => {
+  try{
+    const r = await apiGetProfile();
+    const isEmpty = !r?.profile || Object.keys(r.profile).length === 0;
+    if (!isEmpty) { openProfileView(r.profile); }
+    else { openProfileForm(); }
+  }catch(e){ openProfileForm(); }
+};
 </script>
 </body>
 </html>
-
 
 
 
