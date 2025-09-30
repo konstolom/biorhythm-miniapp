@@ -61,6 +61,15 @@
     @media (min-width:560px){ .checks{grid-template-columns:1fr 1fr} }
     .checks label{display:flex;align-items:center;gap:8px;border:1px solid #eee;border-radius:12px;padding:10px 12px;background:#fff}
     .checks input{width:auto}
+
+    /* ——— анкета: заголовки вопросов + блоки ——— */
+    .qblock{margin:16px 0}
+    .qtitle{font-weight:800;font-size:18px;line-height:1.25;margin:0 0 8px}
+    @media (min-width:560px){ .qtitle{font-size:19px} }
+
+    /* ——— профиль (просмотр): убрать отступы у абзацев ——— */
+    #profileView .desc p{ text-indent:0; margin:0 0 10px; }
+
   </style>
 </head>
 <body>
@@ -371,26 +380,42 @@
       <p class="muted">Чтобы перейти к вашим биоритмам — заполните небольшую анкету.</p>
     </div>
 
-    <div class="card">
-      <label>Где вы родились?</label>
-      <input id="q_birthplace" type="text" placeholder="Город, страна" />
-
-      <label style="margin-top:16px">Отметьте перенесенные вами заболевания</label>
-      <div id="q_self" class="checks"></div>
-
-      <label style="margin-top:16px">Отметьте заболевания, перенесенные вашими родителями</label>
-      <div id="q_parents" class="checks"></div>
-
-      <label style="margin-top:16px">Замечаете ли вы ухудшение самочувствия по сезонам?</label>
-      <div id="q_seasons" class="checks"></div>
-
-      <label style="margin-top:16px">Отметьте инфекции, перенесенные вами в детстве</label>
-      <div id="q_infections" class="checks"></div>
-
-      <div style="height:16px"></div>
+   <div class="card">
+      <!-- Блок 1 -->
+      <div class="qblock">
+        <div class="qtitle">Где вы родились?</div>
+        <input id="q_birthplace" type="text" placeholder="Город, страна" />
+      </div>
+    
+      <!-- Блок 2 -->
+      <div class="qblock">
+        <div class="qtitle">Отметьте перенесенные вами заболевания</div>
+        <div id="q_self" class="checks"></div>
+      </div>
+    
+      <!-- Блок 3 -->
+      <div class="qblock">
+        <div class="qtitle">Отметьте заболевания, перенесенные вашими родителями</div>
+        <div id="q_parents" class="checks"></div>
+      </div>
+    
+      <!-- Блок 4 -->
+      <div class="qblock">
+        <div class="qtitle">Замечаете ли вы ухудшение самочувствия по сезонам?</div>
+        <div id="q_seasons" class="checks"></div>
+      </div>
+    
+      <!-- Блок 5 -->
+      <div class="qblock">
+        <div class="qtitle">Отметьте инфекции, перенесенные вами в детстве</div>
+        <div id="q_infections" class="checks"></div>
+      </div>
+    
+      <div style="height:8px"></div>
       <button id="profileSave"><span class="ico">💾</span>Сохранить</button>
       <p id="profile_status" aria-live="polite"></p>
     </div>
+
   </section>
 
   <!-- PROFILE VIEW (только просмотр) -->
