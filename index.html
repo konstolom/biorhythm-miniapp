@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="="utf-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Биоритмы · Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,11 +13,14 @@
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button,select{width:100%}
+    /* селекты даты — большие и удобные */
     .date-row{display:flex;gap:8px}
     .date-row select{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     input{padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
+    /* кнопки */
     button{padding:14px 18px;border:0;border-radius:14px;font-weight:700;font-size:16px;line-height:1.2;cursor:pointer;background:#2ea6ff;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
     button .ico{font-size:20px;line-height:1}
+    /* сетка меню */
     .menu{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
     .menu button{background:#fff;color:#111;border:1px solid #eee}
@@ -26,15 +29,36 @@
     .ok{color:#1a7f37;font-weight:600}
     .err{color:#b91c1c;font-weight:600}
     .muted{opacity:.8}
+    /* безопасный хедер */
     header{display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:12px;flex-wrap:wrap}
     header .left{display:flex;align-items:center;gap:8px}
     header .right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:0}
     header .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
     .back{background:#fff;color:#111;border:1px solid #eee;padding:10px 14px;border-radius:12px;font-weight:600}
-    .desc{white-space:pre-wrap;line-height:1.6}
+    /* абзацы описаний */
+    .desc p{margin:0 0 12px 0;text-indent:1.5em}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px}
+    /* футер на всех экранах одинаковый */
     .support{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .support .msg{
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      overflow:hidden;max-width:70%;
+    }
     .support .btn{background:#2ea6ff;color:#fff}
+    /* блок результата в строку */
+    .result-row{
+      display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:nowrap
+    }
+    .result-title{font-weight:800;font-size:20px}
+    .result-pill{
+      display:inline-block;font-weight:800;
+      padding:10px 18px;border:3px solid #2ea6ff;border-radius:14px;color:#2ea6ff;
+      font-size:28px;line-height:1
+    }
+    @media (min-width:560px){
+      .result-title{font-size:22px}
+      .result-pill{font-size:32px}
+    }
   </style>
 </head>
 <body>
@@ -55,7 +79,8 @@
       <select id="dobYear" aria-label="Год"></select>
     </div>
 
-    <div style="height:8px"></div>
+    <!-- БОЛЬШИЙ ОТСТУП перед кнопкой -->
+    <div style="height:16px"></div>
     <button id="login"><span class="ico">🔓</span>Войти</button>
     <p id="auth_status"></p>
   </section>
@@ -86,9 +111,9 @@
     </div>
 
     <footer class="support card">
-      <div class="muted">Возникла проблема или есть вопросы?</div>
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
       <a href="https://t.me/konstolom" target="_blank" rel="noopener">
-        <button class="btn"><span class="ico">🆘</span>Тех.поддержка</button>
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
       </a>
     </footer>
   </section>
@@ -105,16 +130,11 @@
       </div>
     </header>
 
-    <!-- блок результата -->
+    <!-- компактный результат в одну строку -->
     <div class="card" style="text-align:center">
-      <div class="muted" style="font-size:18px;margin-bottom:8px">
-        Ваш биоритм 2025 года
-      </div>
-      <div id="yearNumber"
-           style="display:inline-block;font-size:48px;font-weight:800;
-                  padding:20px 36px;border:3px solid #2ea6ff;
-                  border-radius:16px;color:#2ea6ff;margin-bottom:12px">
-        —
+      <div class="result-row">
+        <div class="result-title">Ваш биоритм 2025 года</div>
+        <div id="yearNumber" class="result-pill">—</div>
       </div>
     </div>
 
@@ -123,10 +143,11 @@
       <div id="yearDesc" class="desc"></div>
     </div>
 
+    <!-- такой же футер -->
     <footer class="support card">
-      <div class="muted">Возникла проблема или есть вопросы?</div>
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
       <a href="https://t.me/konstolom" target="_blank" rel="noopener">
-        <button class="btn"><span class="ico">🆘</span>Тех.поддержка</button>
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
       </a>
     </footer>
   </section>
@@ -186,6 +207,29 @@ function getDOBISO(){
   return `${yy}-${mm}-${dd}`;
 }
 
+/* утилита: делим текст на 2–3 абзаца по смыслу */
+function splitIntoParagraphs(text){
+  // если в тексте уже есть пустые строки — используем их
+  const partsByBreak = text.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+  if (partsByBreak.length >= 2 && partsByBreak.length <= 4) return partsByBreak;
+
+  // иначе делим по предложениям (после точки)
+  const sentences = text.split(/(?<=\.)\s+/).map(s=>s.trim()).filter(Boolean);
+  if (sentences.length <= 3) {
+    return [sentences.join(' ')];
+  } else if (sentences.length <= 6) {
+    const mid = Math.ceil(sentences.length/2);
+    return [sentences.slice(0,mid).join(' '), sentences.slice(mid).join(' ')];
+  } else {
+    const third = Math.ceil(sentences.length/3);
+    return [
+      sentences.slice(0, third).join(' '),
+      sentences.slice(third, third*2).join(' '),
+      sentences.slice(third*2).join(' ')
+    ];
+  }
+}
+
 /* логин */
 el('login').onclick = async () => {
   const email = el('email').value.trim().toLowerCase();
@@ -218,7 +262,7 @@ el('btnYear').onclick = async () => {
 
     const DATA = await loadData();
     let desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
-    const paragraphs = desc.split(/(?<=\.)\s+/);
+    const paragraphs = splitIntoParagraphs(desc);
     el('yearDesc').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
 
     show('year');
