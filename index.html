@@ -13,18 +13,19 @@
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button,select{width:100%}
-    /* селекты даты — большие и удобные */
     .date-row{display:flex;gap:8px}
     .date-row select{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     input{padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     /* кнопки */
     button{padding:14px 18px;border:0;border-radius:14px;font-weight:700;font-size:16px;line-height:1.2;cursor:pointer;background:#2ea6ff;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
     button .ico{font-size:20px;line-height:1}
-    /* сетка меню */
+    /* сетки меню */
     .menu{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
     .menu button{background:#fff;color:#111;border:1px solid #eee}
     .menu button:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    .months{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (min-width:560px){ .months{grid-template-columns:repeat(4,1fr)}}
     .hidden{display:none}
     .ok{color:#1a7f37;font-weight:600}
     .err{color:#b91c1c;font-weight:600}
@@ -38,27 +39,15 @@
     /* абзацы описаний */
     .desc p{margin:0 0 12px 0;text-indent:1.5em}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px}
-    /* футер на всех экранах одинаковый */
+    /* футер */
     .support{display:flex;gap:8px;align-items:center;justify-content:space-between}
-    .support .msg{
-      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-      overflow:hidden;max-width:70%;
-    }
+    .support .msg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:70%}
     .support .btn{background:#2ea6ff;color:#fff}
-    /* блок результата в строку */
-    .result-row{
-      display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:nowrap
-    }
+    /* результат в строку */
+    .result-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:nowrap}
     .result-title{font-weight:800;font-size:20px}
-    .result-pill{
-      display:inline-block;font-weight:800;
-      padding:10px 18px;border:3px solid #2ea6ff;border-radius:14px;color:#2ea6ff;
-      font-size:28px;line-height:1
-    }
-    @media (min-width:560px){
-      .result-title{font-size:22px}
-      .result-pill{font-size:32px}
-    }
+    .result-pill{display:inline-block;font-weight:800;padding:10px 18px;border:3px solid #2ea6ff;border-radius:14px;color:#2ea6ff;font-size:28px;line-height:1}
+    @media (min-width:560px){ .result-title{font-size:22px} .result-pill{font-size:32px} }
   </style>
 </head>
 <body>
@@ -79,7 +68,6 @@
       <select id="dobYear" aria-label="Год"></select>
     </div>
 
-    <!-- БОЛЬШИЙ ОТСТУП перед кнопкой -->
     <div style="height:16px"></div>
     <button id="login"><span class="ico">🔓</span>Войти</button>
     <p id="auth_status"></p>
@@ -101,7 +89,7 @@
       <h2>Выберите раздел, который вы хотели бы изучить</h2>
       <div class="menu" style="margin-top:12px">
         <button id="btnYear"><span class="ico">🗓️</span>Биоритмы 2025 года</button>
-        <button disabled><span class="ico">📆</span>Биоритмы по месяцам</button>
+        <button id="btnMonths"><span class="ico">📆</span>Биоритмы по месяцам</button>
         <button disabled><span class="ico">🌿</span>Фитотерапия по месяцам</button>
         <button disabled><span class="ico">🪨</span>Минералы по месяцам</button>
         <button disabled><span class="ico">💊</span>Витамины по месяцам</button>
@@ -121,16 +109,10 @@
   <!-- YEAR PAGE -->
   <section id="year" class="hidden">
     <header>
-      <div class="left">
-        <button class="back" id="backHome"><span class="ico">⬅️</span>Назад</button>
-      </div>
-      <div class="right">
-        <span class="name" id="userName2">—</span>
-        <span class="tag" id="userDob2">—</span>
-      </div>
+      <div class="left"><button class="back" id="backHome"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="name" id="userName2">—</span><span class="tag" id="userDob2">—</span></div>
     </header>
 
-    <!-- компактный результат в одну строку -->
     <div class="card" style="text-align:center">
       <div class="result-row">
         <div class="result-title">Ваш биоритм 2025 года</div>
@@ -138,12 +120,56 @@
       </div>
     </div>
 
-    <!-- блок описания -->
     <div class="card">
       <div id="yearDesc" class="desc"></div>
     </div>
 
-    <!-- такой же футер -->
+    <footer class="support card">
+      <div class="muted msg">Возникла проблема или есть вопросы?</div>
+      <a href="https://t.me/konstolom" target="_blank" rel="noopener">
+        <button class="btn"><span class="ico">🆘</span>Поддержка</button>
+      </a>
+    </footer>
+  </section>
+
+  <!-- MONTHS PAGE -->
+  <section id="month" class="hidden">
+    <header>
+      <div class="left"><button class="back" id="backHome2"><span class="ico">⬅️</span>Назад</button></div>
+      <div class="right"><span class="name" id="userName3">—</span><span class="tag" id="userDob3">—</span></div>
+    </header>
+
+    <div class="card">
+      <h2>Выберите месяц</h2>
+      <div class="months" style="margin-top:12px">
+        <button class="mBtn" data-m="1">Январь</button>
+        <button class="mBtn" data-m="2">Февраль</button>
+        <button class="mBtn" data-m="3">Март</button>
+        <button class="mBtn" data-m="4">Апрель</button>
+        <button class="mBtn" data-m="5">Май</button>
+        <button class="mBtn" data-m="6">Июнь</button>
+        <button class="mBtn" data-m="7">Июль</button>
+        <button class="mBtn" data-m="8">Август</button>
+        <button class="mBtn" data-m="9">Сентябрь</button>
+        <button class="mBtn" data-m="10">Октябрь</button>
+        <button class="mBtn" data-m="11">Ноябрь</button>
+        <button class="mBtn" data-m="12">Декабрь</button>
+      </div>
+    </div>
+
+    <!-- результат выбранного месяца -->
+    <div id="monthResult" class="card" style="text-align:center; display:none">
+      <div class="result-row">
+        <div class="result-title">Ваш биоритм <span id="monthName">месяца</span></div>
+        <div id="monthNumber" class="result-pill">—</div>
+      </div>
+    </div>
+
+    <!-- описание -->
+    <div id="monthDescBlock" class="card" style="display:none">
+      <div id="monthDesc" class="desc"></div>
+    </div>
+
     <footer class="support card">
       <div class="muted msg">Возникла проблема или есть вопросы?</div>
       <a href="https://t.me/konstolom" target="_blank" rel="noopener">
@@ -163,71 +189,46 @@ const tg = window.Telegram?.WebApp; tg?.expand?.();
 const STATE = { user: null, data: null };
 
 function el(id){ return document.getElementById(id); }
-function show(id){ for (const s of ['auth','home','year']) el(s).classList.add('hidden'); el(id).classList.remove('hidden'); }
+function show(id){ for (const s of ['auth','home','year','month']) el(s).classList.add('hidden'); el(id).classList.remove('hidden'); }
 function fmtDob(iso){ if(!iso) return '—'; const [Y,M,D] = iso.slice(0,10).split('-'); return `${D}.${M}.${Y}`; }
 function reduceTo22(n){ while(n > 22){ n = String(n).split('').reduce((a,b)=>a + Number(b), 0);} return n; }
 function computeGeneral2025(dobIso){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9); }
+function computeMonthly(dobIso, monthNum){ const [Y,M,D] = dobIso.slice(0,10).split('-').map(Number); return reduceTo22(D + M + 9 + Number(monthNum)); }
 
-async function loadData(){
-  if (STATE.data) return STATE.data;
-  if (!window.APP_DATA) throw new Error('APP_DATA not found');
-  STATE.data = window.APP_DATA;
-  return STATE.data;
-}
+async function loadData(){ if (STATE.data) return STATE.data; if (!window.APP_DATA) throw new Error('APP_DATA not found'); STATE.data = window.APP_DATA; return STATE.data; }
 
 async function verify(email, dobIso){
   const initData = window.Telegram?.WebApp?.initData || '';
-  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`, {
-    headers: { 'x-telegram-init-data': initData }
-  });
+  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`, { headers: { 'x-telegram-init-data': initData } });
   return r.json();
 }
 
-/* инициализация селектов даты */
+/* селекты даты */
 (function initDOB(){
   const dd = el('dobDay'), mm = el('dobMonth'), yy = el('dobYear');
-  dd.innerHTML = '<option value="" disabled selected>День</option>' +
-    Array.from({length:31}, (_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
+  dd.innerHTML = '<option value="" disabled selected>День</option>' + Array.from({length:31}, (_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
   const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  mm.innerHTML = '<option value="" disabled selected>Мес</option>' +
-    months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${String(i+1).padStart(2,'0')} — ${m}</option>`).join('');
-  const thisYear = new Date().getFullYear();
-  const startYear = 1930;
-  yy.innerHTML = '<option value="" disabled selected>Год</option>' +
-    Array.from({length:thisYear-startYear+1}, (_,k)=>thisYear-k).map(y=>`<option value="${y}">${y}</option>`).join('');
+  mm.innerHTML = '<option value="" disabled selected>Мес</option>' + months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${String(i+1).padStart(2,'0')} — ${m}</option>`).join('');
+  const thisYear = new Date().getFullYear(); const startYear = 1930;
+  yy.innerHTML = '<option value="" disabled selected>Год</option>' + Array.from({length:thisYear-startYear+1}, (_,k)=>thisYear-k).map(y=>`<option value="${y}">${y}</option>`).join('');
 })();
 
 function getDOBISO(){
-  const dd = el('dobDay').value;
-  const mm = el('dobMonth').value;
-  const yy = el('dobYear').value;
+  const dd = el('dobDay').value, mm = el('dobMonth').value, yy = el('dobYear').value;
   if (!dd || !mm || !yy) return '';
   const d = new Date(Number(yy), Number(mm)-1, Number(dd));
   if (d.getFullYear() != yy || (d.getMonth()+1) != Number(mm) || d.getDate() != Number(dd)) return '';
   return `${yy}-${mm}-${dd}`;
 }
 
-/* утилита: делим текст на 2–3 абзаца по смыслу */
+/* утилита: делим текст на 2–3 абзаца */
 function splitIntoParagraphs(text){
-  // если в тексте уже есть пустые строки — используем их
   const partsByBreak = text.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
   if (partsByBreak.length >= 2 && partsByBreak.length <= 4) return partsByBreak;
-
-  // иначе делим по предложениям (после точки)
   const sentences = text.split(/(?<=\.)\s+/).map(s=>s.trim()).filter(Boolean);
-  if (sentences.length <= 3) {
-    return [sentences.join(' ')];
-  } else if (sentences.length <= 6) {
-    const mid = Math.ceil(sentences.length/2);
-    return [sentences.slice(0,mid).join(' '), sentences.slice(mid).join(' ')];
-  } else {
-    const third = Math.ceil(sentences.length/3);
-    return [
-      sentences.slice(0, third).join(' '),
-      sentences.slice(third, third*2).join(' '),
-      sentences.slice(third*2).join(' ')
-    ];
-  }
+  if (sentences.length <= 3) { return [sentences.join(' ')]; }
+  else if (sentences.length <= 6) { const mid = Math.ceil(sentences.length/2); return [sentences.slice(0,mid).join(' '), sentences.slice(mid).join(' ')]; }
+  else { const third = Math.ceil(sentences.length/3); return [ sentences.slice(0, third).join(' '), sentences.slice(third, third*2).join(' '), sentences.slice(third*2).join(' ') ]; }
 }
 
 /* логин */
@@ -241,42 +242,67 @@ el('login').onclick = async () => {
   try{
     const data = await verify(email, dobIso);
     if(!data.ok){ st.textContent = data.error || 'Нет доступа'; st.className='err'; return; }
-
     STATE.user = { email: data.user?.email || email, name: data.user?.name || 'Без имени', dob: (data.user?.dob || dobIso).slice(0,10) };
     el('userName').textContent = STATE.user.name;
     el('userDob').textContent = fmtDob(STATE.user.dob);
-
-    show('home');
-    tg?.MainButton?.hide?.();
+    show('home'); tg?.MainButton?.hide?.();
   }catch(e){ st.textContent='Ошибка соединения'; st.className='err'; }
 };
 
-/* навигация */
+/* YEAR */
 el('btnYear').onclick = async () => {
   try {
     el('userName2').textContent = STATE.user?.name || '—';
     el('userDob2').textContent  = fmtDob(STATE.user?.dob);
-
     const num = computeGeneral2025(STATE.user.dob);
     el('yearNumber').textContent = num;
-
     const DATA = await loadData();
     let desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
     const paragraphs = splitIntoParagraphs(desc);
     el('yearDesc').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
-
     show('year');
-  } catch (err) {
-    console.error('btnYear error:', err);
-    alert('Ошибка при открытии раздела. Подробности в консоли.');
-  }
+  } catch (err) { console.error('btnYear error:', err); alert('Ошибка при открытии раздела.'); }
 };
-
 el('backHome').onclick = () => show('home');
-el('profileBtn').onclick = () => alert('Профиль добавим в следующей итерации 😊');
+
+/* MONTHS */
+el('btnMonths').onclick = () => {
+  el('userName3').textContent = STATE.user?.name || '—';
+  el('userDob3').textContent  = fmtDob(STATE.user?.dob);
+  show('month');
+};
+el('backHome2').onclick = () => show('home');
+
+const MONTH_NAMES_FULL = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
+
+async function onPickMonth(m){
+  const num = computeMonthly(STATE.user.dob, m);
+  el('monthName').textContent = MONTH_NAMES_FULL[m-1];
+  el('monthNumber').textContent = num;
+
+  const DATA = await loadData();
+  let desc = DATA?.MONTHLY?.[String(num)] || 'Описание не найдено.';
+  const paragraphs = splitIntoParagraphs(desc);
+  el('monthDesc').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+
+  // показываем блоки результата/описания (кнопки остаются сверху)
+  el('monthResult').style.display = '';
+  el('monthDescBlock').style.display = '';
+
+  // маленький автоскролл к описанию
+  setTimeout(() => {
+    document.getElementById('monthResult').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 50);
+}
+
+// навесим слушатели на 12 кнопок месяцев
+document.querySelectorAll('.mBtn').forEach(btn=>{
+  btn.addEventListener('click', () => onPickMonth(Number(btn.dataset.m)));
+});
 </script>
 </body>
 </html>
+
 
 
 
