@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Биоритмы · Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,14 +13,11 @@
     h1,h2,h3{margin:0 0 10px}
     label{display:block;margin:10px 0 6px}
     input,button,select{width:100%}
-    /* селекты даты — большие и удобные */
     .date-row{display:flex;gap:8px}
     .date-row select{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
     input{padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
-    /* крупные кнопки с иконками */
     button{padding:14px 18px;border:0;border-radius:14px;font-weight:700;font-size:16px;line-height:1.2;cursor:pointer;background:#2ea6ff;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
     button .ico{font-size:20px;line-height:1}
-    /* сетка меню */
     .menu{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width:560px){ .menu{grid-template-columns:1fr 1fr}}
     .menu button{background:#fff;color:#111;border:1px solid #eee}
@@ -29,15 +26,13 @@
     .ok{color:#1a7f37;font-weight:600}
     .err{color:#b91c1c;font-weight:600}
     .muted{opacity:.8}
-    /* безопасный хедер */
     header{display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:12px;flex-wrap:wrap}
     header .left{display:flex;align-items:center;gap:8px}
     header .right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:0}
     header .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
     .back{background:#fff;color:#111;border:1px solid #eee;padding:10px 14px;border-radius:12px;font-weight:600}
-    .desc{white-space:pre-wrap;line-height:1.5}
+    .desc{white-space:pre-wrap;line-height:1.6}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;font-size:12px}
-    /* футер одинаковый на всех страницах */
     .support{display:flex;gap:8px;align-items:center;justify-content:space-between}
     .support .btn{background:#2ea6ff;color:#fff}
   </style>
@@ -110,12 +105,24 @@
       </div>
     </header>
 
-    <div class="card">
-      <h2 id="yearTitle">Ваш биоритм 2025 года = —</h2>
-      <div id="yearDesc" class="desc muted" style="margin-top:8px"></div>
+    <!-- блок результата -->
+    <div class="card" style="text-align:center">
+      <div class="muted" style="font-size:18px;margin-bottom:8px">
+        Ваш биоритм 2025 года
+      </div>
+      <div id="yearNumber"
+           style="display:inline-block;font-size:48px;font-weight:800;
+                  padding:20px 36px;border:3px solid #2ea6ff;
+                  border-radius:16px;color:#2ea6ff;margin-bottom:12px">
+        —
+      </div>
     </div>
 
-    <!-- такой же футер, как на главной -->
+    <!-- блок описания -->
+    <div class="card">
+      <div id="yearDesc" class="desc"></div>
+    </div>
+
     <footer class="support card">
       <div class="muted">Возникла проблема или есть вопросы?</div>
       <a href="https://t.me/konstolom" target="_blank" rel="noopener">
@@ -148,26 +155,25 @@ async function loadData(){
 }
 
 async function verify(email, dobIso){
-  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`);
+  const initData = window.Telegram?.WebApp?.initData || '';
+  const r = await fetch(`/api/verify?email=${encodeURIComponent(email)}&dob=${encodeURIComponent(dobIso)}`, {
+    headers: { 'x-telegram-init-data': initData }
+  });
   return r.json();
 }
 
-/* ---- инициализация выпадающих списков даты ---- */
+/* инициализация селектов даты */
 (function initDOB(){
   const dd = el('dobDay'), mm = el('dobMonth'), yy = el('dobYear');
-  // дни 1..31
   dd.innerHTML = '<option value="" disabled selected>День</option>' +
     Array.from({length:31}, (_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
-  // месяцы
   const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
   mm.innerHTML = '<option value="" disabled selected>Мес</option>' +
     months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${String(i+1).padStart(2,'0')} — ${m}</option>`).join('');
-  // годы
   const thisYear = new Date().getFullYear();
   const startYear = 1930;
   yy.innerHTML = '<option value="" disabled selected>Год</option>' +
-    Array.from({length:thisYear-startYear+1}, (_,k)=>thisYear-k)
-      .map(y=>`<option value="${y}">${y}</option>`).join('');
+    Array.from({length:thisYear-startYear+1}, (_,k)=>thisYear-k).map(y=>`<option value="${y}">${y}</option>`).join('');
 })();
 
 function getDOBISO(){
@@ -175,13 +181,12 @@ function getDOBISO(){
   const mm = el('dobMonth').value;
   const yy = el('dobYear').value;
   if (!dd || !mm || !yy) return '';
-  // простая валидация даты (например 31.02 -> недопустимо)
   const d = new Date(Number(yy), Number(mm)-1, Number(dd));
   if (d.getFullYear() != yy || (d.getMonth()+1) != Number(mm) || d.getDate() != Number(dd)) return '';
   return `${yy}-${mm}-${dd}`;
 }
 
-/* ---- логин ---- */
+/* логин */
 el('login').onclick = async () => {
   const email = el('email').value.trim().toLowerCase();
   const dobIso = getDOBISO();
@@ -202,18 +207,19 @@ el('login').onclick = async () => {
   }catch(e){ st.textContent='Ошибка соединения'; st.className='err'; }
 };
 
-/* ---- навигация ---- */
+/* навигация */
 el('btnYear').onclick = async () => {
   try {
     el('userName2').textContent = STATE.user?.name || '—';
     el('userDob2').textContent  = fmtDob(STATE.user?.dob);
 
     const num = computeGeneral2025(STATE.user.dob);
-    el('yearTitle').textContent = `Ваш биоритм 2025 года = ${num}`;
+    el('yearNumber').textContent = num;
 
     const DATA = await loadData();
-    const desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
-    el('yearDesc').textContent = desc;
+    let desc = DATA?.GENERAL?.[String(num)] || 'Описание не найдено.';
+    const paragraphs = desc.split(/(?<=\.)\s+/);
+    el('yearDesc').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
 
     show('year');
   } catch (err) {
@@ -227,6 +233,7 @@ el('profileBtn').onclick = () => alert('Профиль добавим в сле�
 </script>
 </body>
 </html>
+
 
 
 
