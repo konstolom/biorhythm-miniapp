@@ -26,10 +26,7 @@ export default async function handler(req, res){
       .eq('email', e)
       .maybeSingle();
 
-    if (error) {
-  console.error("SUPABASE ERROR:", error);
-  return res.status(500).json({ ok:false, error: error.message || 'DB error' });
-}
+   if (error) return res.status(500).json({ ok:false, error: 'DB error' });
 
     if (!data) return res.status(200).json({ ok:false, error: 'Пользователь не найден' });
 
